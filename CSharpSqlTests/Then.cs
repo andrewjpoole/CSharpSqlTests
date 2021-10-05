@@ -7,11 +7,11 @@ namespace CSharpSqlTests
 {
     public class Then
     {
-        private LocalDbTestContext _context;
+        private LocalDbTestContext2 _context;
 
-        public Then(LocalDbTestContext context) => _context = context;
+        public Then(LocalDbTestContext2 context) => _context = context;
 
-        public static Then UsingThe(LocalDbTestContext context) => new Then(context);
+        public static Then UsingThe(LocalDbTestContext2 context) => new Then(context);
 
         public Then And() => this;
 
@@ -26,6 +26,8 @@ namespace CSharpSqlTests
             var reader = (SqlDataReader) _context.LastQueryResult;
 
             var tableDataResult = TableDefinition.FromSqlDataReader(reader);
+
+            reader.Close();
 
             var areEqual = tableDataResult.IsEqualTo(expectedMarkDownTableString);
 

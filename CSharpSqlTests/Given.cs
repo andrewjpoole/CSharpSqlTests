@@ -6,17 +6,17 @@ namespace CSharpSqlTests
 {
     public class Given
     {
-        private LocalDbTestContext _context;
+        private LocalDbTestContext2 _context;
 
-        public Given(LocalDbTestContext context) => _context = context;
+        public Given(LocalDbTestContext2 context) => _context = context;
 
-        public static Given UsingThe(LocalDbTestContext context) => new Given(context);
+        public static Given UsingThe(LocalDbTestContext2 context) => new Given(context);
 
         public Given And() => this;
 
-        public Given TheDacpacIsDeployed(SqlConnection connection)
+        public Given TheDacpacIsDeployed(string dacpacProjectName = "")
         {
-            _context.DeployDacpac(connection);
+            _context.DeployDacpac(dacpacProjectName);
 
             return this;
         }
@@ -30,6 +30,7 @@ namespace CSharpSqlTests
                 var cmd = _context.SqlConnection.CreateCommand();
                 cmd.CommandText = tableData.ToSqlString(tableName);
                 cmd.CommandType = CommandType.Text;
+                cmd.Transaction = _context.SqlTransaction;
 
                 _context.LastQueryResult = cmd.ExecuteNonQuery();
 

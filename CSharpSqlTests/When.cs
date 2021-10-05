@@ -4,11 +4,11 @@ namespace CSharpSqlTests
 {
     public class When
     {
-        private LocalDbTestContext _context;
+        private LocalDbTestContext2 _context;
 
-        public When(LocalDbTestContext context) => _context = context;
+        public When(LocalDbTestContext2 context) => _context = context;
 
-        public static When UsingThe(LocalDbTestContext context) => new When(context);
+        public static When UsingThe(LocalDbTestContext2 context) => new When(context);
 
         public When And() => this;
 
@@ -17,6 +17,7 @@ namespace CSharpSqlTests
             var cmd = _context.SqlConnection.CreateCommand();
             cmd.CommandText = storedProcedureName;
             cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Transaction = _context.SqlTransaction;
 
             foreach (var (name, value) in parameters)
             {
@@ -39,6 +40,7 @@ namespace CSharpSqlTests
             var cmd = _context.SqlConnection.CreateCommand();
             cmd.CommandText = cmdText;
             cmd.CommandType = CommandType.Text;
+            cmd.Transaction = _context.SqlTransaction;
 
             _context.LastQueryResult = cmd.ExecuteScalar();
             returnValue = _context.LastQueryResult;
@@ -51,6 +53,7 @@ namespace CSharpSqlTests
             var cmd = _context.SqlConnection.CreateCommand();
             cmd.CommandText = cmdText;
             cmd.CommandType = CommandType.Text;
+            cmd.Transaction = _context.SqlTransaction;
 
             _context.LastQueryResult = cmd.ExecuteReader();
             returnValue = _context.LastQueryResult;
