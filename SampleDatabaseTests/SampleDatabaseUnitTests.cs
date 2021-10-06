@@ -19,7 +19,7 @@ namespace SampleDatabaseTests
         [Fact]
         public void Connection_can_be_used_to_deploy_dacpac_and_run_stored_procedure_from_it()
         {
-            new LocalDbTestContext2(DataBaseName, message => _testOutputHelper.WriteLine(message))
+            new LocalDbTestContext(DataBaseName, message => _testOutputHelper.WriteLine(message))
                 .Start()
                 .DeployDacpac()
                 .RunTest((connection, transaction) =>

@@ -6,16 +6,16 @@ namespace CSharpSqlTests
 {
     public class Given
     {
-        private LocalDbTestContext2 _context;
+        private LocalDbTestContext _context;
         private readonly Action<string> _logAction;
 
-        public Given(LocalDbTestContext2 context, Action<string> logAction = null)
+        public Given(LocalDbTestContext context, Action<string> logAction = null)
         {
             _context = context;
             _logAction = logAction;
         }
 
-        public static Given UsingThe(LocalDbTestContext2 context, Action<string> logAction = null) => new Given(context, logAction);
+        public static Given UsingThe(LocalDbTestContext context, Action<string> logAction = null) => new Given(context, logAction);
 
         public Given And() => this;
 

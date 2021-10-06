@@ -7,16 +7,16 @@ namespace CSharpSqlTests
 {
     public class Then
     {
-        private LocalDbTestContext2 _context;
+        private LocalDbTestContext _context;
         private readonly Action<string> _logAction;
 
-        public Then(LocalDbTestContext2 context, Action<string> logAction = null)
+        public Then(LocalDbTestContext context, Action<string> logAction = null)
         {
             _context = context;
             _logAction = logAction;
         }
 
-        public static Then UsingThe(LocalDbTestContext2 context, Action<string> logAction = null) => new Then(context, logAction);
+        public static Then UsingThe(LocalDbTestContext context, Action<string> logAction = null) => new Then(context, logAction);
 
         public Then And() => this;
 

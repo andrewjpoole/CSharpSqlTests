@@ -5,16 +5,16 @@ namespace CSharpSqlTests
 {
     public class When
     {
-        private LocalDbTestContext2 _context;
+        private LocalDbTestContext _context;
         private readonly Action<string> _logAction;
 
-        public When(LocalDbTestContext2 context, Action<string> logAction = null)
+        public When(LocalDbTestContext context, Action<string> logAction = null)
         {
             _context = context;
             _logAction = logAction;
         }
 
-        public static When UsingThe(LocalDbTestContext2 context, Action<string> logAction = null) => new When(context, logAction);
+        public static When UsingThe(LocalDbTestContext context, Action<string> logAction = null) => new When(context, logAction);
 
         public When And() => this;
 
