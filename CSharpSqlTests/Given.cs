@@ -23,24 +23,16 @@ namespace CSharpSqlTests
 
         public Given TheFollowingDataExistsInTheTable(string tableName, string markdownTableString)
         {
-            try
-            {
-                var tableData = TableDefinition.FromMarkdownTableString(markdownTableString);
+            var tableData = TableDefinition.FromMarkdownTableString(markdownTableString);
 
-                var cmd = _context.SqlConnection.CreateCommand();
-                cmd.CommandText = tableData.ToSqlString(tableName);
-                cmd.CommandType = CommandType.Text;
-                cmd.Transaction = _context.SqlTransaction;
+            var cmd = _context.SqlConnection.CreateCommand();
+            cmd.CommandText = tableData.ToSqlString(tableName);
+            cmd.CommandType = CommandType.Text;
+            cmd.Transaction = _context.SqlTransaction;
 
-                _context.LastQueryResult = cmd.ExecuteNonQuery();
+            _context.LastQueryResult = cmd.ExecuteNonQuery();
 
-                return this;
-            }
-            catch (Exception e)
-            {
-                _context.TestOutputHelper.WriteLine(e.ToString());
-                throw;
-            }
+            return this;
         }
     }
 }

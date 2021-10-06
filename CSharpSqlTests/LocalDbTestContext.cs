@@ -109,25 +109,22 @@ namespace CSharpSqlTests
     public class LocalDbTestContext2
     {
         private string _databaseName;
-
+        private readonly Action<string> _logTiming;
         private SqlLocalDbApi _localDbApi;
         private TemporarySqlLocalDbInstance _instance;
         private ISqlLocalDbInstanceManager _manager;
         private string _instanceName;
-        public SqlConnection SqlConnection;
-        public SqlTransaction SqlTransaction;
-
-        public object LastQueryResult;
-
-        public readonly ITestOutputHelper TestOutputHelper;
-
         private DateTime _instanceStartedTime;
         private DateTime _lastLogTime;
 
-        public LocalDbTestContext2(string databaseName, ITestOutputHelper testOutputHelper = null)
+        public SqlConnection SqlConnection;
+        public SqlTransaction SqlTransaction;
+        public object LastQueryResult;
+
+        public LocalDbTestContext2(string databaseName, Action<string> logTiming = null)
         {
             _databaseName = databaseName;
-            TestOutputHelper = testOutputHelper;
+            _logTiming = logTiming;
         }
 
         public void Start()
@@ -175,9 +172,12 @@ namespace CSharpSqlTests
 
         private void LogTiming(string message)
         {
+            if (_logTiming is null)
+                return;
+
             var now = DateTime.Now;
             var elapsed = now - _lastLogTime;
-            TestOutputHelper?.WriteLine($"{message} after {Math.Round(elapsed.TotalSeconds, 2)}s");
+            _logTiming($"{message} after {Math.Round(elapsed.TotalSeconds, 2)}s");
             _lastLogTime = DateTime.Now;
         }
 
@@ -222,7 +222,9 @@ namespace CSharpSqlTests
             LogTiming("instance directory deleted");
 
             var elapsed = DateTime.Now - _instanceStartedTime;
-            TestOutputHelper?.WriteLine($"Test run completed after {Math.Round(elapsed.TotalSeconds, 2)}s");
-        }
+
+            if(_logTiming is not null)
+                _logTiming($"Test run completed after {Math.Round(elapsed.TotalSeconds, 2)}s");
+        }        
     }
 }

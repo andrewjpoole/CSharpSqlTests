@@ -1,23 +1,22 @@
-using System;
 using CSharpSqlTests;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace SampleDatabaseTests
 {
-    public class SampleDatabaseTestsUsingASingleContext : IDisposable
+    public class SampleDatabaseTestsUsingASingleContext : IClassFixture<LocalDbContextFixture>
     {
         private readonly ITestOutputHelper _testOutputHelper;
+        private readonly LocalDbContextFixture _localDbContextFixture;
         private readonly LocalDbTestContext2 _context;
 
-        public SampleDatabaseTestsUsingASingleContext(ITestOutputHelper testOutputHelper)
+        public SampleDatabaseTestsUsingASingleContext(ITestOutputHelper testOutputHelper, LocalDbContextFixture localDbContextFixture)
         {
             _testOutputHelper = testOutputHelper;
-            _context = new LocalDbTestContext2("DatabaseToTest", _testOutputHelper);
-            _context.Start();
-            _context.DeployDacpac();
+            _localDbContextFixture = localDbContextFixture;
+            _context = _localDbContextFixture.Context;
         }
-
+        
         [Fact]
         public void helper_classes_can_be_used_to_deploy_dacpac_and_run_stored_procedure_from_it()
         {
@@ -54,11 +53,6 @@ namespace SampleDatabaseTests
                     .TheQueryResultsShouldBe(tempData);
 
             });
-        }
-
-        public void Dispose()
-        {
-            _context.TearDown();
         }
     }
 }
