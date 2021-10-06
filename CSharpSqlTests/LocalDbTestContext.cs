@@ -127,7 +127,7 @@ namespace CSharpSqlTests
             _logTiming = logTiming;
         }
 
-        public void Start()
+        public LocalDbTestContext2 Start()
         {
             _lastLogTime = DateTime.Now;
 
@@ -151,18 +151,21 @@ namespace CSharpSqlTests
             LogTiming("database connected");
 
             SqlConnection.ChangeDatabase(_databaseName);
-            
+
             // ready to run tests in individual transactions
-            
+
+            return this;
         }
 
-        public void RunTest(Action<SqlConnection, SqlTransaction> useConnection)
+        public LocalDbTestContext2 RunTest(Action<SqlConnection, SqlTransaction> useConnection)
         {
             SqlTransaction = SqlConnection.BeginTransaction(DateTime.Now.Ticks.ToString());
 
             useConnection(SqlConnection, SqlTransaction);
 
             SqlTransaction.Rollback(); // leave the context untouched for the next test
+
+            return this;
         }
 
         public SqlConnection GetNewSqlConnection()
@@ -181,7 +184,7 @@ namespace CSharpSqlTests
             _lastLogTime = DateTime.Now;
         }
 
-        public void DeployDacpac(string dacpacProjectName = "")
+        public LocalDbTestContext2 DeployDacpac(string dacpacProjectName = "")
         {
             var dacPacInfo = new DacPacInfo(dacpacProjectName != string.Empty ? dacpacProjectName : _databaseName);
 
@@ -203,6 +206,8 @@ namespace CSharpSqlTests
             );
 
             LogTiming("dacpac deployed");
+
+            return this;
         }
 
         public void TearDown()

@@ -43,7 +43,7 @@ namespace SampleDatabaseTests
                 | 1  | Andrew |
                 | 2  | Jo     |";
 
-                Given.UsingThe(_context)
+                Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
                     .And().TheFollowingDataExistsInTheTable("Table1", tempData);
 
                 When.UsingThe(_context)

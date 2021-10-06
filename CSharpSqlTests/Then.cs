@@ -8,12 +8,23 @@ namespace CSharpSqlTests
     public class Then
     {
         private LocalDbTestContext2 _context;
+        private readonly Action<string> _logAction;
 
-        public Then(LocalDbTestContext2 context) => _context = context;
+        public Then(LocalDbTestContext2 context, Action<string> logAction = null)
+        {
+            _context = context;
+            _logAction = logAction;
+        }
 
-        public static Then UsingThe(LocalDbTestContext2 context) => new Then(context);
+        public static Then UsingThe(LocalDbTestContext2 context, Action<string> logAction = null) => new Then(context, logAction);
 
         public Then And() => this;
+
+        private void LogMessage(string message)
+        {
+            if (_logAction is not null)
+                _logAction(message);
+        }
 
         public Then TheLastQueryResultShouldBe(object expected)
         {

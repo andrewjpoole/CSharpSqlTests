@@ -1,16 +1,28 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 
 namespace CSharpSqlTests
 {
     public class When
     {
         private LocalDbTestContext2 _context;
+        private readonly Action<string> _logAction;
 
-        public When(LocalDbTestContext2 context) => _context = context;
+        public When(LocalDbTestContext2 context, Action<string> logAction = null)
+        {
+            _context = context;
+            _logAction = logAction;
+        }
 
-        public static When UsingThe(LocalDbTestContext2 context) => new When(context);
+        public static When UsingThe(LocalDbTestContext2 context, Action<string> logAction = null) => new When(context, logAction);
 
         public When And() => this;
+
+        private void LogMessage(string message)
+        {
+            if (_logAction is not null)
+                _logAction(message);
+        }
 
         public When TheStoredProcedureIsExecuted(string storedProcedureName, out object returnValue, params (string Name, object Value)[] parameters)
         {

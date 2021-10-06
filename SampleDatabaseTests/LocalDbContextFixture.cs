@@ -10,7 +10,7 @@ namespace SampleDatabaseTests
         public LocalDbTestContext2 Context;
 
         public LocalDbContextFixture(IMessageSink sink)
-        {            
+        {
             Context = new LocalDbTestContext2("DatabaseToTest", log => sink.OnMessage(new DiagnosticMessage(log)));
             Context.Start();
             Context.DeployDacpac();
