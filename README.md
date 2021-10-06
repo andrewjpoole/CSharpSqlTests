@@ -18,7 +18,7 @@ public class SampleDatabaseTestsUsingASingleContext : IClassFixture<LocalDbConte
 {
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly LocalDbContextFixture _localDbContextFixture;
-    private readonly LocalDbTestContext2 _context;
+    private readonly LocalDbTestContext _context;
 
     public SampleDatabaseTestsUsingASingleContext(ITestOutputHelper testOutputHelper, LocalDbContextFixture localDbContextFixture)
     {
