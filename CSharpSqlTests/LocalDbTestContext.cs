@@ -59,11 +59,15 @@ namespace CSharpSqlTests
 
         public LocalDbTestContext RunTest(Action<SqlConnection, SqlTransaction> useConnection)
         {
-            SqlTransaction = SqlConnection.BeginTransaction(DateTime.Now.Ticks.ToString());
-
-            useConnection(SqlConnection, SqlTransaction);
-
-            SqlTransaction.Rollback(); // leave the context untouched for the next test
+            try
+            {
+                SqlTransaction = SqlConnection.BeginTransaction(DateTime.Now.Ticks.ToString());
+                useConnection(SqlConnection, SqlTransaction);
+            }            
+            finally 
+            {
+                SqlTransaction.Rollback(); // leave the context untouched for the next test
+            }
 
             return this;
         }
@@ -84,6 +88,12 @@ namespace CSharpSqlTests
             _lastLogTime = DateTime.Now;
         }
 
+        /// <summary>
+        /// Deploys the latest built dacpac, please not this method does not trigger a build, if you have changes to the dacpac, please manually build them. 
+        /// </summary>
+        /// <param name="dacpacProjectName"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public LocalDbTestContext DeployDacpac(string dacpacProjectName = "")
         {
             var dacPacInfo = new DacPacInfo(dacpacProjectName != string.Empty ? dacpacProjectName : _databaseName);

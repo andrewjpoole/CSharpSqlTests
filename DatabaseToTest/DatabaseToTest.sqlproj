@@ -59,7 +59,12 @@
     <Folder Include="dbo" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="dbo\Table1.sql" />
-    <Build Include="dbo\spFetchRecords.sql" />
+    <Build Include="dbo\spAddTwoNumbers.sql" />
+    <Build Include="dbo\Customers.sql" />
+    <Build Include="dbo\Orders.sql" />
+    <Build Include="dbo\spFetchOrderById.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="DatabaseToTest.refactorlog" />
   </ItemGroup>
 </Project>

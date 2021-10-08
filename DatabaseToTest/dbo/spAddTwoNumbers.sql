@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[spFetchRecords]
+﻿CREATE PROCEDURE [dbo].[spAddTwoNumbers]
 	@param1 int,
 	@param2 int
 AS	

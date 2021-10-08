@@ -20,6 +20,8 @@ namespace CSharpSqlTests
             // | ------- | ------- |
             // | valueA  | valueB  |
             // | valueC  | valueD  |
+            // | valueC  | [dbnull]| -> interpret as null
+            // | valueC  |         | -> interpret as empty string
 
             var tableDefinition = new TableDefinition();
 
@@ -37,8 +39,13 @@ namespace CSharpSqlTests
             {
                 var row = new TableRowDefinition();
                 foreach (var columnValue in tableDataRow.Split("|", StringSplitOptions.RemoveEmptyEntries).ToList())
-                {
-                    row.ColumnValues.Add(columnValue.Trim());
+                {                    
+                    row.ColumnValues.Add(columnValue.Trim() switch 
+                    {
+                        "emptyString" => string.Empty,
+                        "null" => null,
+                        _ => columnValue.Trim()
+                    });
                 }
                 tableDefinition.Rows.Add(row);
             }
@@ -82,7 +89,8 @@ namespace CSharpSqlTests
                     var invertedComma = isNumeric ? "" : "'";
 
                     var comma = firstInLoop ? "" : ",";
-                    sb.Append($"{comma}{invertedComma}{columnValue}{invertedComma}");
+                    var columnValueString = columnValue is not null ? columnValue.ToString() : "null";
+                    sb.Append($"{comma}{invertedComma}{columnValueString}{invertedComma}");
 
                     if (firstInLoop)
                         firstInLoop = false;
@@ -137,7 +145,16 @@ namespace CSharpSqlTests
                     if (dbColumn.DataTypeName == "money")
                         row.ColumnValues.Add($" {((decimal)reader[dbColumn.ColumnName]):C}");
                     else
-                        row.ColumnValues.Add($" {reader[dbColumn.ColumnName]}");
+                    {
+                        var value = reader[dbColumn.ColumnName];
+                        var stringValue = value switch 
+                        {
+                            "" => "emptyString",
+                            DBNull => "null",
+                            _ => value.ToString()
+                        };
+                        row.ColumnValues.Add($" {stringValue}");
+                    }
                 }
                 tableData.Rows.Add(row);
             }

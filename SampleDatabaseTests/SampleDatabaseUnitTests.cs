@@ -26,7 +26,7 @@ namespace SampleDatabaseTests
                 {
 
                     var cmd = connection.CreateCommand();
-                    cmd.CommandText = "spFetchRecords";
+                    cmd.CommandText = "spAddTwoNumbers";
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@param1", 2);
                     cmd.Parameters.AddWithValue("@param2", 3);

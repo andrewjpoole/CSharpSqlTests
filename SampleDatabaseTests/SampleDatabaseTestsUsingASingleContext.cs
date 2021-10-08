@@ -25,7 +25,7 @@ namespace SampleDatabaseTests
                 Given.UsingThe(_context);
 
                 When.UsingThe(_context)
-                    .TheStoredProcedureIsExecuted("spFetchRecords", out var returnValue, ("@param1", 5), ("@param2", 12));
+                    .TheStoredProcedureIsExecuted("spAddTwoNumbers", out var returnValue, ("@param1", 5), ("@param2", 12));
 
                 Then.UsingThe(_context)
                     .TheLastQueryResultShouldBe(17);
@@ -38,19 +38,42 @@ namespace SampleDatabaseTests
             _context.RunTest((connection, transaction) =>
             {
                 var tempData = @"
-                | Id | Name   |
-                | -- | ----   |
-                | 1  | Andrew |
-                | 2  | Jo     |";
+                | Id | Name   | Address     |
+                | -- | ------ | ----------- |
+                | 1  | Andrew | emptyString |
+                | 2  | Jo     | null        |";
 
                 Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
-                    .And().TheFollowingDataExistsInTheTable("Table1", tempData);
+                    .And().TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
-                    .TheQueryIsExecuted("SELECT * FROM Table1", out var table1Rows);
+                    .TheQueryIsExecuted("SELECT * FROM Customers", out var table1Rows);
 
                 Then.UsingThe(_context)
                     .TheQueryResultsShouldBe(tempData);
+
+            });
+        }
+
+        [Fact]
+        public void test_dropping_fk_constring_reduce_seeding_requirements() 
+        {
+            _context.RunTest((connection, transaction) => 
+            {
+                var expectedOrder = @"
+                    | Id | Customers_Id | DateCreated | DateFulfilled  | DatePaid | ProductName | Quantity | QuotedPrice | Notes       |
+                    | -- | ------------ | ----------- | -------------- | -------- | ----------- | -------- | ----------- | ----------- |
+                    | 23 | 1            | 2021-07-21  | 2021-08-01     | null     | Apples      | 21       | 5.29        | emptyString |";
+
+                Given.UsingThe(_context)
+                .TheFollowingSqlStatementIsExecuted("ALTER TABLE Orders DROP CONSTRAINT FK_Orders_Customers;")
+                .And().TheFollowingDataExistsInTheTable("Orders", expectedOrder);
+
+                When.UsingThe(_context)
+                .TheStoredProcedureIsExecuted("spFetchOrderById", out var order, ("OrderId", 23));
+
+                Then.UsingThe(_context)
+                .TheQueryResultsShouldBe(expectedOrder);
 
             });
         }

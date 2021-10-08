@@ -18,22 +18,24 @@ namespace SampleDatabaseTests
         public void tableData_FromString_method_returns_a_tableData()
         {
             var testString = @"
-| column1 | column2 |
-| --- | --- |
-| valueA | valueB |
-| valueC | valueD |";
+| column1     | column2 |
+| ----------- | ------- |
+| valueA      | valueB  |
+| valueC      | valueD  |
+| emptyString | null    |";
 
             var tableDefinition = TableDefinition.FromMarkdownTableString(testString);
 
-            tableDefinition.Rows.Count.Should().Be(2);
             tableDefinition.Columns.Count.Should().Be(2);
             tableDefinition.Columns[0].Should().Be("column1");
             tableDefinition.Columns[1].Should().Be("column2");
-            tableDefinition.Rows.Count.Should().Be(2);
+            tableDefinition.Rows.Count.Should().Be(3);
             tableDefinition.Rows[0].ColumnValues[0].Should().Be("valueA");
             tableDefinition.Rows[0].ColumnValues[1].Should().Be("valueB");
             tableDefinition.Rows[1].ColumnValues[0].Should().Be("valueC");
             tableDefinition.Rows[1].ColumnValues[1].Should().Be("valueD");
+            tableDefinition.Rows[2].ColumnValues[0].Should().Be(string.Empty);
+            tableDefinition.Rows[2].ColumnValues[1].Should().Be(null);
         }
 
         [Fact]

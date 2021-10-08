@@ -53,8 +53,33 @@ namespace CSharpSqlTests
             {
                 LogMessage($"Exception thrown while executing TheFollowingDataExistsInTheTable, {ex.ToString}");
                 throw;
+            }            
+        }
+
+        public Given TheForeignKeyConstraintIsRemoved(string tableName, string fkConstraintName) 
+        {
+            return TheFollowingSqlStatementIsExecuted($"ALTER TABLE {tableName} DROP CONSTRAINT {fkConstraintName};");
+        }
+
+        public Given TheFollowingSqlStatementIsExecuted(string sql)
+        {
+            try
+            {
+                var cmd = _context.SqlConnection.CreateCommand();
+                cmd.CommandText = sql;
+                cmd.CommandType = CommandType.Text;
+                cmd.Transaction = _context.SqlTransaction;
+
+                _context.LastQueryResult = cmd.ExecuteNonQuery();
+
+                LogMessage("TheFollowingSqlStatementIsExecuted executed successfully");
+                return this;
             }
-            
+            catch (Exception ex)
+            {
+                LogMessage($"Exception thrown while executing TheFollowingSqlStatementIsExecuted, {ex.ToString}");
+                throw;
+            }            
         }
     }    
 }
