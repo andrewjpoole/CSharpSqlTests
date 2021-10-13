@@ -24,7 +24,7 @@ namespace CSharpSqlTests
                 _logAction(message);
         }
 
-        public When TheStoredProcedureIsExecuted(string storedProcedureName, out object returnValue, params (string Name, object Value)[] parameters)
+        public When TheStoredProcedureIsExecutedWithReturnParameter(string storedProcedureName, out object returnValue, params (string Name, object Value)[] parameters)
         {
             var cmd = _context.SqlConnection.CreateCommand();
             cmd.CommandText = storedProcedureName;
@@ -46,7 +46,24 @@ namespace CSharpSqlTests
 
             return this;
         }
-        
+
+        public When TheStoredProcedureIsExecutedWithReader(string storedProcedureName, params (string Name, object Value)[] parameters)
+        {
+            var cmd = _context.SqlConnection.CreateCommand();
+            cmd.CommandText = storedProcedureName;
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Transaction = _context.SqlTransaction;
+
+            foreach (var (name, value) in parameters)
+            {
+                cmd.Parameters.AddWithValue(name, value);
+            }
+            
+            _context.LastQueryResult = cmd.ExecuteReader();
+
+            return this;
+        }
+
         public When TheScalarQueryIsExecuted(string cmdText, out object returnValue)
         {
             var cmd = _context.SqlConnection.CreateCommand();
@@ -60,7 +77,7 @@ namespace CSharpSqlTests
             return this;
         }
 
-        public When TheQueryIsExecuted(string cmdText, out object returnValue)
+        public When TheReaderQueryIsExecuted(string cmdText, out object returnValue)
         {
             var cmd = _context.SqlConnection.CreateCommand();
             cmd.CommandText = cmdText;

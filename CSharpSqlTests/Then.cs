@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using Microsoft.Data.SqlClient;
 using Xunit;
@@ -26,30 +27,35 @@ namespace CSharpSqlTests
                 _logAction(message);
         }
 
-        public Then TheLastQueryResultShouldBe(object expected)
+        public Then TheLastQueryResultShouldBe(object expected) // todo rename this, it shouldn't be used for datareader
         {
             Assert.True(_context.LastQueryResult.Equals(expected));
             return this;
         }
 
-        public Then TheQueryResultsShouldBe(string expectedMarkDownTableString)
+        public Then TheReaderQueryResultsShouldBe(string expectedMarkDownTableString)
         {
-            var reader = (SqlDataReader) _context.LastQueryResult;
+            var expectedTableData = TableDefinition.FromMarkdownTableString(expectedMarkDownTableString);
+
+            TheReaderQueryResultsShouldBe(expectedTableData);
+
+            return this;
+        }
+
+        public Then TheReaderQueryResultsShouldBe(TableDefinition expectedData)
+        {
+            var reader = (SqlDataReader)_context.LastQueryResult;
 
             var tableDataResult = TableDefinition.FromSqlDataReader(reader);
 
             reader.Close();
 
-            var areEqual = tableDataResult.IsEqualTo(expectedMarkDownTableString);
+            var areEqual = tableDataResult.IsEqualTo(expectedData, out var differences);
 
             if (!areEqual)
             {
-                var sb = new StringBuilder();
-                sb.AppendLine("Expected:");
-                sb.AppendLine(expectedMarkDownTableString);
-                sb.AppendLine("Actual:");
-                sb.AppendLine(tableDataResult.ToMarkdownTableString());
-                throw new Exception(sb.ToString());
+                var message = $"Differences:\n{string.Join(Environment.NewLine, differences)}";
+                throw new Exception(message);
             }
 
             return this;

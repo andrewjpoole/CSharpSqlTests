@@ -4,6 +4,6 @@ namespace CSharpSqlTests
 {
     public class TableRowDefinition
     {
-        public List<string> ColumnValues = new();
+        public List<object> ColumnValues = new();
     }
 }

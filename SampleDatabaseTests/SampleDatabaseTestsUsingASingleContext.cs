@@ -25,7 +25,7 @@ namespace SampleDatabaseTests
                 Given.UsingThe(_context);
 
                 When.UsingThe(_context)
-                    .TheStoredProcedureIsExecuted("spAddTwoNumbers", out var returnValue, ("@param1", 5), ("@param2", 12));
+                    .TheStoredProcedureIsExecutedWithReturnParameter("spAddTwoNumbers", out var returnValue, ("@param1", 5), ("@param2", 12));
 
                 Then.UsingThe(_context)
                     .TheLastQueryResultShouldBe(17);
@@ -47,10 +47,10 @@ namespace SampleDatabaseTests
                     .And().TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
-                    .TheQueryIsExecuted("SELECT * FROM Customers", out var table1Rows);
+                    .TheReaderQueryIsExecuted("SELECT * FROM Customers", out var table1Rows);
 
                 Then.UsingThe(_context)
-                    .TheQueryResultsShouldBe(tempData);
+                    .TheReaderQueryResultsShouldBe(tempData);
 
             });
         }
@@ -63,17 +63,17 @@ namespace SampleDatabaseTests
                 var expectedOrder = @"
                     | Id | Customers_Id | DateCreated | DateFulfilled  | DatePaid | ProductName | Quantity | QuotedPrice | Notes       |
                     | -- | ------------ | ----------- | -------------- | -------- | ----------- | -------- | ----------- | ----------- |
-                    | 23 | 1            | 2021-07-21  | 2021-08-01     | null     | Apples      | 21       | 5.29        | emptyString |";
+                    | 23 | 1            | 2021/07/21  | 2021/08/02     | null     | Apples      | 21       | 5.29        | emptyString |";
 
                 Given.UsingThe(_context)
                 .TheFollowingSqlStatementIsExecuted("ALTER TABLE Orders DROP CONSTRAINT FK_Orders_Customers;")
                 .And().TheFollowingDataExistsInTheTable("Orders", expectedOrder);
 
                 When.UsingThe(_context)
-                .TheStoredProcedureIsExecuted("spFetchOrderById", out var order, ("OrderId", 23));
+                .TheStoredProcedureIsExecutedWithReader("spFetchOrderById", ("OrderId", 23));
 
                 Then.UsingThe(_context)
-                .TheQueryResultsShouldBe(expectedOrder);
+                .TheReaderQueryResultsShouldBe(expectedOrder);
 
             });
         }

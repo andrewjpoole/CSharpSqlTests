@@ -66,6 +66,10 @@ namespace CSharpSqlTests
             }            
             finally 
             {
+                var lastQueryResultAsReader = LastQueryResult as SqlDataReader;
+                if(lastQueryResultAsReader is not null)
+                    lastQueryResultAsReader.Close(); // close any open datareaders as they are against the connection and will stuff up other tests
+
                 SqlTransaction.Rollback(); // leave the context untouched for the next test
             }
 

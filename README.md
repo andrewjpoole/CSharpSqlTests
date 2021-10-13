@@ -43,24 +43,24 @@ public class SampleDatabaseTestsUsingASingleContext : IClassFixture<LocalDbConte
     }
 
     [Fact]
-    public void helper_classes_can_be_used_to_insert_rows_from_markdown_table_and_query()
+    public void test_dropping_fk_constring_reduce_seeding_requirements() 
     {
-        _context.RunTest((connection, transaction) =>
+        _context.RunTest((connection, transaction) => 
         {
-            var tempData = @"
-            | Id | Name   |
-            | -- | ----   |
-            | 1  | Andrew |
-            | 2  | Jo     |";
+            var expectedOrder = @"
+                | Id | Customers_Id | DateCreated | DateFulfilled  | DatePaid | ProductName | Quantity | QuotedPrice | Notes       |
+                | -- | ------------ | ----------- | -------------- | -------- | ----------- | -------- | ----------- | ----------- |
+                | 23 | 1            | 2021/07/21  | 2021/08/02     | null     | Apples      | 21       | 5.29        | emptyString |";
 
-            Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
-                .And().TheFollowingDataExistsInTheTable("Table1", tempData);
+            Given.UsingThe(_context)
+            .TheFollowingSqlStatementIsExecuted("ALTER TABLE Orders DROP CONSTRAINT FK_Orders_Customers;")
+            .And().TheFollowingDataExistsInTheTable("Orders", expectedOrder);
 
             When.UsingThe(_context)
-                .TheQueryIsExecuted("SELECT * FROM Table1", out var table1Rows);
+            .TheStoredProcedureIsExecutedWithReader("spFetchOrderById", ("OrderId", 23));
 
             Then.UsingThe(_context)
-                .TheQueryResultsShouldBe(tempData);
+            .TheReaderQueryResultsShouldBe(expectedOrder);
 
         });
     }
