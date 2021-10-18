@@ -8,7 +8,7 @@ namespace CSharpSqlTests
 {
     public class LocalDbTestContext
     {
-        private string _databaseName;
+        private readonly string _databaseName;
         private readonly Action<string> _logTiming;
         private SqlLocalDbApi _localDbApi;
         private TemporarySqlLocalDbInstance _instance;

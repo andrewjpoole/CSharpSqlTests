@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Data;
+// ReSharper disable UnusedMember.Local
 
 namespace CSharpSqlTests
 {
     public class When
     {
-        private LocalDbTestContext _context;
+        private readonly LocalDbTestContext _context;
         private readonly Action<string> _logAction;
 
         public When(LocalDbTestContext context, Action<string> logAction = null)
@@ -20,8 +21,7 @@ namespace CSharpSqlTests
 
         private void LogMessage(string message)
         {
-            if (_logAction is not null)
-                _logAction(message);
+            _logAction?.Invoke(message);
         }
 
         public When TheStoredProcedureIsExecutedWithReturnParameter(string storedProcedureName, out object returnValue, params (string Name, object Value)[] parameters)

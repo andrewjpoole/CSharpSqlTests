@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
 using Microsoft.Data.SqlClient;
 using Xunit;
+// ReSharper disable UnusedMember.Local
 
 namespace CSharpSqlTests
 {
@@ -23,11 +22,10 @@ namespace CSharpSqlTests
 
         private void LogMessage(string message)
         {
-            if (_logAction is not null)
-                _logAction(message);
+            _logAction?.Invoke(message);
         }
 
-        public Then TheLastQueryResultShouldBe(object expected) // todo rename this, it shouldn't be used for datareader
+        public Then TheNonReaderQueryResultShouldBe(object expected)
         {
             Assert.True(_context.LastQueryResult.Equals(expected));
             return this;
@@ -35,30 +33,27 @@ namespace CSharpSqlTests
 
         public Then TheReaderQueryResultsShouldBe(string expectedMarkDownTableString)
         {
-            var expectedTableData = TableDefinition.FromMarkdownTableString(expectedMarkDownTableString);
+            var expectedTableData = TabularData.FromMarkdownTableString(expectedMarkDownTableString);
 
             TheReaderQueryResultsShouldBe(expectedTableData);
 
             return this;
         }
 
-        public Then TheReaderQueryResultsShouldBe(TableDefinition expectedData)
+        public Then TheReaderQueryResultsShouldBe(TabularData expectedData)
         {
             var reader = (SqlDataReader)_context.LastQueryResult;
 
-            var tableDataResult = TableDefinition.FromSqlDataReader(reader);
+            var tableDataResult = TabularData.FromSqlDataReader(reader);
 
             reader.Close();
 
             var areEqual = tableDataResult.IsEqualTo(expectedData, out var differences);
 
-            if (!areEqual)
-            {
-                var message = $"Differences:\n{string.Join(Environment.NewLine, differences)}";
-                throw new Exception(message);
-            }
+            if (areEqual) return this;
 
-            return this;
+            var message = $"Differences:\n{string.Join(Environment.NewLine, differences)}";
+            throw new Exception(message);
         }
     }
 }

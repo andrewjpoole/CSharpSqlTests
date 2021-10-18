@@ -28,7 +28,7 @@ namespace SampleDatabaseTests
                     .TheStoredProcedureIsExecutedWithReturnParameter("spAddTwoNumbers", out var returnValue, ("@param1", 5), ("@param2", 12));
 
                 Then.UsingThe(_context)
-                    .TheLastQueryResultShouldBe(17);
+                    .TheNonReaderQueryResultShouldBe(17);
             });
         }
 

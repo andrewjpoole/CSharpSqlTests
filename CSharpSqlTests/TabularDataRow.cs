@@ -2,7 +2,7 @@
 
 namespace CSharpSqlTests
 {
-    public class TableRowDefinition
+    public class TabularDataRow
     {
         public List<object> ColumnValues = new();
     }

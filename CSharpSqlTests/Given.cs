@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
+// ReSharper disable UnusedMember.Local
 
 namespace CSharpSqlTests
 {
     public class Given
     {
-        private LocalDbTestContext _context;
+        private readonly LocalDbTestContext _context;
         private readonly Action<string> _logAction;
 
         public Given(LocalDbTestContext context, Action<string> logAction = null)
@@ -15,7 +15,7 @@ namespace CSharpSqlTests
             _logAction = logAction;
         }
 
-        public static Given UsingThe(LocalDbTestContext context, Action<string> logAction = null) => new Given(context, logAction);
+        public static Given UsingThe(LocalDbTestContext context, Action<string> logAction = null) => new(context, logAction);
 
         public Given And() => this;
 
@@ -36,7 +36,7 @@ namespace CSharpSqlTests
         {
             try
             {
-                var tableData = TableDefinition.FromMarkdownTableString(markdownTableString);
+                var tableData = TabularData.FromMarkdownTableString(markdownTableString);
 
                 var cmd = _context.SqlConnection.CreateCommand();
                 cmd.CommandText = tableData.ToSqlString(tableName);
@@ -51,7 +51,7 @@ namespace CSharpSqlTests
             }
             catch (Exception ex)
             {
-                LogMessage($"Exception thrown while executing TheFollowingDataExistsInTheTable, {ex.ToString}");
+                LogMessage($"Exception thrown while executing TheFollowingDataExistsInTheTable, {ex}");
                 throw;
             }            
         }
@@ -77,7 +77,7 @@ namespace CSharpSqlTests
             }
             catch (Exception ex)
             {
-                LogMessage($"Exception thrown while executing TheFollowingSqlStatementIsExecuted, {ex.ToString}");
+                LogMessage($"Exception thrown while executing TheFollowingSqlStatementIsExecuted, {ex}");
                 throw;
             }            
         }

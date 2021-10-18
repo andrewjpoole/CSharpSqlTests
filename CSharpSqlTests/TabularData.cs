@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -8,10 +7,10 @@ using Microsoft.Data.SqlClient;
 
 namespace CSharpSqlTests
 {
-    public class TableDefinition
+    public class TabularData
     {
         public List<string> Columns = new();
-        public List<TableRowDefinition> Rows = new();
+        public List<TabularDataRow> Rows = new();
 
         private static Func<string, object> markdownStringValuesToSqlObjectValue = value =>
         {
@@ -36,26 +35,27 @@ namespace CSharpSqlTests
                 "null" => null,
                 "true" => true,
                 "false" => false,
+                null => DBNull.Value,
                 _ => value.Trim()
             };
         };        
 
-        private static Func<object, string> sqlObjectValuesToMarkdownStringValue = sqlValue =>
-        {
-            if (DBNull.Value == sqlValue)
-                return "null";
+        //private static Func<object, string> sqlObjectValuesToMarkdownStringValue = sqlValue =>
+        //{
+        //    if (DBNull.Value == sqlValue)
+        //        return "null";
 
-            return sqlValue switch
-            {
-                "" => "emptyString",
-                null => "null",
-                _ => sqlValue.ToString().Trim()
-            };
-        };
+        //    return sqlValue switch
+        //    {
+        //        "" => "emptyString",
+        //        null => "null",
+        //        _ => sqlValue.ToString().Trim()
+        //    };
+        //};
 
-        public static TableDefinition FromMarkdownTableString(string tableString)
+        public static TabularData FromMarkdownTableString(string tableString)
         {
-            // example TableDefinition
+            // example TabularData
             // | column1 | column2 |
             // | ------- | ------- |
             // | valueA  | valueB  |
@@ -63,7 +63,7 @@ namespace CSharpSqlTests
             // | valueC  | null    | -> interpret as null
             // | valueC  | emptyString | -> interpret as empty string
 
-            var tableDefinition = new TableDefinition();
+            var tableDefinition = new TabularData();
 
             var rawLines = tableString.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToList();
 
@@ -77,7 +77,7 @@ namespace CSharpSqlTests
             
             foreach (var tableDataRow in trimmedLines.Skip(2))
             {
-                var row = new TableRowDefinition();
+                var row = new TabularDataRow();
                 foreach (var columnValue in tableDataRow.Split("|", StringSplitOptions.RemoveEmptyEntries).ToList())
                 {                    
                     row.ColumnValues.Add(markdownStringValuesToSqlObjectValue(columnValue.Trim()));
@@ -161,19 +161,19 @@ namespace CSharpSqlTests
 
             foreach(var row in Rows)
             {
-                sbRows.Append("\n|");
+                sbRows.Append($"{Environment.NewLine}|");
                 foreach (var columnValue in row.ColumnValues)
                 {
                     sbRows.Append($" {columnValue} |");
                 }
             }
 
-            return $"{sbColumnNames}\n{sbColumnAlignment}{sbRows}";
+            return $"{sbColumnNames}{Environment.NewLine}{sbColumnAlignment}{sbRows}";
         }
 
-        public static TableDefinition FromSqlDataReader(SqlDataReader reader)
+        public static TabularData FromSqlDataReader(SqlDataReader reader)
         {
-            var tableData = new TableDefinition();
+            var tableData = new TabularData();
 
             var columns = reader.GetColumnSchema();
 
@@ -184,7 +184,7 @@ namespace CSharpSqlTests
 
             while (reader.Read())
             {
-                var row = new TableRowDefinition();
+                var row = new TabularDataRow();
                 foreach (var dbColumn in columns)
                 {
                     if (dbColumn.DataTypeName == "money")
@@ -203,20 +203,20 @@ namespace CSharpSqlTests
 
         public bool IsEqualTo(string value)
         {
-            Func<string, string> stripInsignificantStuff = value => value
-                .Replace(" ", string.Empty)
-                .Replace("\n", string.Empty)
-                .Replace("\r", string.Empty)
-                .Replace(Environment.NewLine, string.Empty)
-                .Replace("-", string.Empty);
+            string StripInsignificantStuff(string thingToStrip) =>
+                thingToStrip.Replace(" ", string.Empty)
+                    .Replace("\n", string.Empty)
+                    .Replace("\r", string.Empty)
+                    .Replace(Environment.NewLine, string.Empty)
+                    .Replace("-", string.Empty);
 
-            var significantDataFromThis = stripInsignificantStuff(ToMarkdownTableString());
-            var significantDataFromValue = stripInsignificantStuff(value);
+            var significantDataFromThis = StripInsignificantStuff(ToMarkdownTableString());
+            var significantDataFromValue = StripInsignificantStuff(value);
 
             return significantDataFromThis.Equals(significantDataFromValue);
         }
 
-        public bool IsEqualTo(TableDefinition value, out List<string> differences)
+        public bool IsEqualTo(TabularData value, out List<string> differences)
         {
             differences = new List<string>();
 
@@ -259,9 +259,9 @@ namespace CSharpSqlTests
             return differences.Count == 0;
         }
 
-        public static TableDefinition CreateWithColumns(params string[] columns)
+        public static TabularData CreateWithColumns(params string[] columns)
         {
-            var tableData = new TableDefinition();
+            var tableData = new TabularData();
 
             foreach (var column in columns)
             {
@@ -271,12 +271,12 @@ namespace CSharpSqlTests
             return tableData;
         }
 
-        public TableDefinition AddRowWithValues(params object[] columnValues)
+        public TabularData AddRowWithValues(params object[] columnValues)
         {
             if (columnValues.Length != Columns.Count)
                 throw new Exception($"Incorrect number of column values supplied, should be {Columns.Count}");
 
-            var newRow = new TableRowDefinition();
+            var newRow = new TabularDataRow();
             foreach (var columnValue in columnValues)
             {
                 // todo handle nulls?
