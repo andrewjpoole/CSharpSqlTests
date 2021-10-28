@@ -4,6 +4,6 @@ namespace CSharpSqlTests
 {
     public class TabularDataRow
     {
-        public List<object> ColumnValues = new();
+        public List<object?> ColumnValues = new();
     }
 }

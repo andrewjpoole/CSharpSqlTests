@@ -12,7 +12,7 @@ namespace CSharpSqlTests
         public List<string> Columns = new();
         public List<TabularDataRow> Rows = new();
 
-        private static Func<string, object> markdownStringValuesToSqlObjectValue = value =>
+        private static Func<string, object?> markdownStringValuesToSqlObjectValue = value =>
         {
             if (DateTime.TryParse(value, out var valueAsDate))
                 return valueAsDate;
@@ -128,7 +128,7 @@ namespace CSharpSqlTests
                     }
                     else 
                     {
-                        var isNumeric = columnValue.IsNumeric();
+                        var isNumeric = columnValue?.IsNumeric() ?? false;
                                         
                         var columnValueString = columnValue is not null ? columnValue.ToString() : "null";
                     
@@ -243,7 +243,7 @@ namespace CSharpSqlTests
                 if (thisRow.ColumnValues.Count != valueRow.ColumnValues.Count)
                     differences.Add($"Row[{rowIndex}] has different count of RowValues: {thisRow.ColumnValues.Count} vs {valueRow.ColumnValues.Count}");
                 
-                for (int colValueIndex = 0; colValueIndex < thisRow.ColumnValues.Count; colValueIndex++)
+                for (var colValueIndex = 0; colValueIndex < thisRow.ColumnValues.Count; colValueIndex++)
                 {
                     var thisColValue = thisRow.ColumnValues[colValueIndex];
                     var valueColValue = valueRow.ColumnValues[colValueIndex];
@@ -251,7 +251,7 @@ namespace CSharpSqlTests
                     if (thisColValue is null && valueColValue is null)
                         continue;
 
-                    if (thisColValue.Equals(valueColValue) == false)
+                    if (thisColValue?.Equals(valueColValue) == false)
                         differences.Add($"Row[{rowIndex}].ColumnValues[{colValueIndex}] is different: <{thisColValue}> vs <{valueColValue}>");
                 }
             }

@@ -6,16 +6,16 @@ namespace CSharpSqlTests
 {
     public class When
     {
-        private readonly LocalDbTestContext _context;
-        private readonly Action<string> _logAction;
+        private readonly ILocalDbTestContext _context;
+        private readonly Action<string>? _logAction;
 
-        public When(LocalDbTestContext context, Action<string> logAction = null)
+        public When(ILocalDbTestContext context, Action<string>? logAction = null)
         {
             _context = context;
             _logAction = logAction;
         }
 
-        public static When UsingThe(LocalDbTestContext context, Action<string> logAction = null) => new When(context, logAction);
+        public static When UsingThe(ILocalDbTestContext context, Action<string>? logAction = null) => new When(context, logAction);
 
         public When And() => this;
 
@@ -24,7 +24,7 @@ namespace CSharpSqlTests
             _logAction?.Invoke(message);
         }
 
-        public When TheStoredProcedureIsExecutedWithReturnParameter(string storedProcedureName, out object returnValue, params (string Name, object Value)[] parameters)
+        public When TheStoredProcedureIsExecutedWithReturnParameter(string storedProcedureName, out object? returnValue, params (string Name, object Value)[] parameters)
         {
             var cmd = _context.SqlConnection.CreateCommand();
             cmd.CommandText = storedProcedureName;
@@ -33,11 +33,16 @@ namespace CSharpSqlTests
 
             foreach (var (name, value) in parameters)
             {
-                cmd.Parameters.AddWithValue(name, value);
+                var param = cmd.CreateParameter();
+                param.ParameterName = name;
+                param.Value = value;
+                cmd.Parameters.Add(param);
             }
-            
-            var returnParameter = cmd.Parameters.Add("@ReturnVal", SqlDbType.Int);
+
+            var returnParameter = cmd.CreateParameter();
+            returnParameter.ParameterName = "@ReturnVal";
             returnParameter.Direction = ParameterDirection.ReturnValue;
+            cmd.Parameters.Add(returnParameter);
 
             cmd.ExecuteNonQuery();
 
@@ -56,7 +61,10 @@ namespace CSharpSqlTests
 
             foreach (var (name, value) in parameters)
             {
-                cmd.Parameters.AddWithValue(name, value);
+                var param = cmd.CreateParameter();
+                param.ParameterName = name;
+                param.Value = value;
+                cmd.Parameters.Add(param);
             }
             
             _context.LastQueryResult = cmd.ExecuteReader();
@@ -64,7 +72,15 @@ namespace CSharpSqlTests
             return this;
         }
 
-        public When TheScalarQueryIsExecuted(string cmdText, out object returnValue)
+        public When TheScalarQueryIsExecuted(string cmdText, out object? returnValue)
+        {
+            TheScalarQueryIsExecuted(cmdText);
+            returnValue = _context.LastQueryResult;
+
+            return this;
+        }
+
+        public When TheScalarQueryIsExecuted(string cmdText)
         {
             var cmd = _context.SqlConnection.CreateCommand();
             cmd.CommandText = cmdText;
@@ -72,12 +88,19 @@ namespace CSharpSqlTests
             cmd.Transaction = _context.SqlTransaction;
 
             _context.LastQueryResult = cmd.ExecuteScalar();
+
+            return this;
+        }
+
+        public When TheReaderQueryIsExecuted(string cmdText, out object? returnValue)
+        {
+            TheReaderQueryIsExecuted(cmdText);
             returnValue = _context.LastQueryResult;
 
             return this;
         }
 
-        public When TheReaderQueryIsExecuted(string cmdText, out object returnValue)
+        public When TheReaderQueryIsExecuted(string cmdText)
         {
             var cmd = _context.SqlConnection.CreateCommand();
             cmd.CommandText = cmdText;
@@ -85,7 +108,6 @@ namespace CSharpSqlTests
             cmd.Transaction = _context.SqlTransaction;
 
             _context.LastQueryResult = cmd.ExecuteReader();
-            returnValue = _context.LastQueryResult;
 
             return this;
         }

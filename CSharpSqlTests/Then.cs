@@ -7,16 +7,16 @@ namespace CSharpSqlTests
 {
     public class Then
     {
-        private LocalDbTestContext _context;
-        private readonly Action<string> _logAction;
+        private readonly ILocalDbTestContext _context;
+        private readonly Action<string>? _logAction;
 
-        public Then(LocalDbTestContext context, Action<string> logAction = null)
+        public Then(ILocalDbTestContext context, Action<string>? logAction = null)
         {
             _context = context;
             _logAction = logAction;
         }
 
-        public static Then UsingThe(LocalDbTestContext context, Action<string> logAction = null) => new Then(context, logAction);
+        public static Then UsingThe(ILocalDbTestContext context, Action<string>? logAction = null) => new Then(context, logAction);
 
         public Then And() => this;
 
@@ -27,7 +27,7 @@ namespace CSharpSqlTests
 
         public Then TheNonReaderQueryResultShouldBe(object expected)
         {
-            Assert.True(_context.LastQueryResult.Equals(expected));
+            Assert.True(_context.LastQueryResult?.Equals(expected));
             return this;
         }
 
@@ -42,7 +42,13 @@ namespace CSharpSqlTests
 
         public Then TheReaderQueryResultsShouldBe(TabularData expectedData)
         {
+            if (_context.LastQueryResult is null)
+                throw new Exception("context.LastQueryResult is null");
+
             var reader = (SqlDataReader)_context.LastQueryResult;
+
+            if (reader is null)
+                throw new Exception("context.LastQueryResult does not contain a SqlDataReader object");
 
             var tableDataResult = TabularData.FromSqlDataReader(reader);
 

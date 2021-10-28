@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.IO;
 using MartinCostello.SqlLocalDb;
 using Microsoft.Data.SqlClient;
@@ -6,29 +7,47 @@ using Microsoft.SqlServer.Dac;
 
 namespace CSharpSqlTests
 {
-    public class LocalDbTestContext
+    public interface ILocalDbTestContext
+    {
+        LocalDbTestContext RunTest(Action<IDbConnection, IDbTransaction> useConnection);
+        IDbConnection GetNewSqlConnection();
+
+        /// <summary>
+        /// Deploys the latest built dacpac, please not this method does not trigger a build, if you have changes to the dacpac, please manually build them. 
+        /// </summary>
+        /// <param name="dacpacProjectName"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        LocalDbTestContext DeployDacpac(string dacpacProjectName = "");
+
+        void TearDown();
+
+        IDbConnection SqlConnection { get; }
+        IDbTransaction? SqlTransaction { get; }
+        object? LastQueryResult { get; set; }
+    }
+
+    public class LocalDbTestContext : ILocalDbTestContext
     {
         private readonly string _databaseName;
-        private readonly Action<string> _logTiming;
-        private SqlLocalDbApi _localDbApi;
+        private readonly Action<string>? _logTiming;
+        private readonly SqlLocalDbApi _localDbApi;
         private TemporarySqlLocalDbInstance _instance;
         private ISqlLocalDbInstanceManager _manager;
         private string _instanceName;
         private DateTime _instanceStartedTime;
         private DateTime _lastLogTime;
 
-        public SqlConnection SqlConnection;
-        public SqlTransaction SqlTransaction;
-        public object LastQueryResult;
+        //public SqlConnection SqlConnection { get; private set; }
+        public IDbConnection SqlConnection { get; private set; }
+        public IDbTransaction? SqlTransaction { get; private set; }
+        public object? LastQueryResult { get; set; }
 
-        public LocalDbTestContext(string databaseName, Action<string> logTiming = null)
+        public LocalDbTestContext(string databaseName, Action<string>? logTiming = null)
         {
             _databaseName = databaseName;
             _logTiming = logTiming;
-        }
-
-        public LocalDbTestContext Start()
-        {
+        
             _lastLogTime = DateTime.Now;
 
             _localDbApi = new SqlLocalDbApi();
@@ -44,24 +63,32 @@ namespace CSharpSqlTests
             SqlConnection = new SqlConnection(_instance.ConnectionString);
             SqlConnection.Open();
             LogTiming("connection opened");
-
+            
             // Create temp database
-            using (var command = new SqlCommand($"DROP DATABASE IF EXISTS {_databaseName}", SqlConnection)) command.ExecuteNonQuery();
-            using (var command = new SqlCommand($"CREATE DATABASE {_databaseName}", SqlConnection)) command.ExecuteNonQuery();
+            var dropCmd = SqlConnection.CreateCommand();
+            dropCmd.CommandText = $"DROP DATABASE IF EXISTS {_databaseName}";
+            dropCmd.CommandType = CommandType.Text;
+            dropCmd.ExecuteNonQuery();
+
+            var createDbCmd = SqlConnection.CreateCommand();
+            createDbCmd.CommandText = $"CREATE DATABASE {_databaseName}";
+            createDbCmd.CommandType = CommandType.Text;
+            createDbCmd.ExecuteNonQuery();
+
+            //using (var command = new SqlCommand($"DROP DATABASE IF EXISTS {_databaseName}", SqlConnection)) command.ExecuteNonQuery();
+            //using (var command = new SqlCommand($"CREATE DATABASE {_databaseName}", SqlConnection)) command.ExecuteNonQuery();
             LogTiming("database connected");
 
             SqlConnection.ChangeDatabase(_databaseName);
 
             // ready to run tests in individual transactions
-
-            return this;
         }
 
-        public LocalDbTestContext RunTest(Action<SqlConnection, SqlTransaction> useConnection)
+        public LocalDbTestContext RunTest(Action<IDbConnection, IDbTransaction> useConnection)
         {
             try
             {
-                SqlTransaction = SqlConnection.BeginTransaction(DateTime.Now.Ticks.ToString());
+                SqlTransaction = SqlConnection.BeginTransaction();
                 useConnection(SqlConnection, SqlTransaction);
             }            
             finally 
@@ -70,15 +97,15 @@ namespace CSharpSqlTests
                 if(lastQueryResultAsReader is not null)
                     lastQueryResultAsReader.Close(); // close any open datareaders as they are against the connection and will stuff up other tests
 
-                SqlTransaction.Rollback(); // leave the context untouched for the next test
+                SqlTransaction?.Rollback(); // leave the context untouched for the next test
             }
 
             return this;
         }
 
-        public SqlConnection GetNewSqlConnection()
+        public IDbConnection GetNewSqlConnection()
         {
-            return new(_instance.ConnectionString);
+            return new SqlConnection(_instance.ConnectionString);
         }
 
         private void LogTiming(string message)

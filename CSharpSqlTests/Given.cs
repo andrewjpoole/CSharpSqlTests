@@ -6,23 +6,22 @@ namespace CSharpSqlTests
 {
     public class Given
     {
-        private readonly LocalDbTestContext _context;
-        private readonly Action<string> _logAction;
+        private readonly ILocalDbTestContext _context;
+        private readonly Action<string>? _logAction;
 
-        public Given(LocalDbTestContext context, Action<string> logAction = null)
+        public Given(ILocalDbTestContext context, Action<string>? logAction = null)
         {
             _context = context;
             _logAction = logAction;
         }
 
-        public static Given UsingThe(LocalDbTestContext context, Action<string> logAction = null) => new(context, logAction);
+        public static Given UsingThe(LocalDbTestContext context, Action<string>? logAction = null) => new(context, logAction);
 
         public Given And() => this;
 
-        private void LogMessage(string message) 
-        { 
-            if(_logAction is not null)
-                _logAction(message);
+        private void LogMessage(string message)
+        {
+            _logAction?.Invoke(message);
         }
 
         public Given TheDacpacIsDeployed(string dacpacProjectName = "")
