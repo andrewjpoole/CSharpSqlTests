@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -171,27 +173,28 @@ namespace CSharpSqlTests
             return $"{sbColumnNames}{Environment.NewLine}{sbColumnAlignment}{sbRows}";
         }
 
-        public static TabularData FromSqlDataReader(SqlDataReader reader)
+        public static TabularData FromSqlDataReader(IDataReader dataReader)
         {
             var tableData = new TabularData();
 
-            var columns = reader.GetColumnSchema();
-
+            var columnSchemaGen = (IDbColumnSchemaGenerator)dataReader;
+            var columns = columnSchemaGen.GetColumnSchema();
+            
             foreach (var dbColumn in columns)
             {
                 tableData.Columns.Add(dbColumn.ColumnName.Trim());
             }
 
-            while (reader.Read())
+            while (dataReader.Read())
             {
                 var row = new TabularDataRow();
                 foreach (var dbColumn in columns)
                 {
                     if (dbColumn.DataTypeName == "money")
-                        row.ColumnValues.Add($"{((decimal)reader[dbColumn.ColumnName]):C}");
+                        row.ColumnValues.Add($"{((decimal)dataReader[dbColumn.ColumnName]):C}");
                     else
                     {
-                        var value = reader[dbColumn.ColumnName];
+                        var value = dataReader[dbColumn.ColumnName];
                         row.ColumnValues.Add(DBNull.Value == value ? null : value);
                     }
                 }

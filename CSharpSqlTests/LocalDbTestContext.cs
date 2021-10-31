@@ -37,8 +37,7 @@ namespace CSharpSqlTests
         private string _instanceName;
         private DateTime _instanceStartedTime;
         private DateTime _lastLogTime;
-
-        //public SqlConnection SqlConnection { get; private set; }
+        
         public IDbConnection SqlConnection { get; private set; }
         public IDbTransaction? SqlTransaction { get; private set; }
         public object? LastQueryResult { get; set; }
@@ -74,9 +73,7 @@ namespace CSharpSqlTests
             createDbCmd.CommandText = $"CREATE DATABASE {_databaseName}";
             createDbCmd.CommandType = CommandType.Text;
             createDbCmd.ExecuteNonQuery();
-
-            //using (var command = new SqlCommand($"DROP DATABASE IF EXISTS {_databaseName}", SqlConnection)) command.ExecuteNonQuery();
-            //using (var command = new SqlCommand($"CREATE DATABASE {_databaseName}", SqlConnection)) command.ExecuteNonQuery();
+            
             LogTiming("database connected");
 
             SqlConnection.ChangeDatabase(_databaseName);
@@ -93,8 +90,7 @@ namespace CSharpSqlTests
             }            
             finally 
             {
-                var lastQueryResultAsReader = LastQueryResult as SqlDataReader;
-                if(lastQueryResultAsReader is not null)
+                if(LastQueryResult is IDataReader lastQueryResultAsReader)
                     lastQueryResultAsReader.Close(); // close any open datareaders as they are against the connection and will stuff up other tests
 
                 SqlTransaction?.Rollback(); // leave the context untouched for the next test

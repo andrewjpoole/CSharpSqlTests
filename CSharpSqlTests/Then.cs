@@ -1,5 +1,5 @@
 ﻿using System;
-using Microsoft.Data.SqlClient;
+using System.Data;
 using Xunit;
 // ReSharper disable UnusedMember.Local
 
@@ -8,23 +8,16 @@ namespace CSharpSqlTests
     public class Then
     {
         private readonly ILocalDbTestContext _context;
-        private readonly Action<string>? _logAction;
 
-        public Then(ILocalDbTestContext context, Action<string>? logAction = null)
+        public Then(ILocalDbTestContext context)
         {
             _context = context;
-            _logAction = logAction;
         }
 
-        public static Then UsingThe(ILocalDbTestContext context, Action<string>? logAction = null) => new Then(context, logAction);
+        public static Then UsingThe(ILocalDbTestContext context) => new Then(context);
 
         public Then And() => this;
-
-        private void LogMessage(string message)
-        {
-            _logAction?.Invoke(message);
-        }
-
+        
         public Then TheNonReaderQueryResultShouldBe(object expected)
         {
             Assert.True(_context.LastQueryResult?.Equals(expected));
@@ -45,14 +38,14 @@ namespace CSharpSqlTests
             if (_context.LastQueryResult is null)
                 throw new Exception("context.LastQueryResult is null");
 
-            var reader = (SqlDataReader)_context.LastQueryResult;
+            var dataReader = (IDataReader)_context.LastQueryResult;
 
-            if (reader is null)
-                throw new Exception("context.LastQueryResult does not contain a SqlDataReader object");
+            if (dataReader is null)
+                throw new Exception("context.LastQueryResult does not contain a IDataReader object");
 
-            var tableDataResult = TabularData.FromSqlDataReader(reader);
+            var tableDataResult = TabularData.FromSqlDataReader(dataReader);
 
-            reader.Close();
+            dataReader.Close();
 
             var areEqual = tableDataResult.IsEqualTo(expectedData, out var differences);
 

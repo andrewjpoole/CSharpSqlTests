@@ -26,6 +26,15 @@ namespace CSharpSqlTests
 
         public When TheStoredProcedureIsExecutedWithReturnParameter(string storedProcedureName, out object? returnValue, params (string Name, object Value)[] parameters)
         {
+            
+            TheStoredProcedureIsExecutedWithReturnParameter(storedProcedureName, parameters);
+            returnValue = _context.LastQueryResult;
+
+            return this;
+        }
+
+        public When TheStoredProcedureIsExecutedWithReturnParameter(string storedProcedureName, params (string Name, object Value)[] parameters)
+        {
             var cmd = _context.SqlConnection.CreateCommand();
             cmd.CommandText = storedProcedureName;
             cmd.CommandType = CommandType.StoredProcedure;
@@ -47,7 +56,6 @@ namespace CSharpSqlTests
             cmd.ExecuteNonQuery();
 
             _context.LastQueryResult = returnParameter.Value;
-            returnValue = _context.LastQueryResult;
 
             return this;
         }
@@ -68,7 +76,7 @@ namespace CSharpSqlTests
             }
             
             _context.LastQueryResult = cmd.ExecuteReader();
-
+            
             return this;
         }
 
@@ -106,7 +114,7 @@ namespace CSharpSqlTests
             cmd.CommandText = cmdText;
             cmd.CommandType = CommandType.Text;
             cmd.Transaction = _context.SqlTransaction;
-
+            
             _context.LastQueryResult = cmd.ExecuteReader();
 
             return this;
