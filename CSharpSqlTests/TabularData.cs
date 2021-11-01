@@ -204,21 +204,6 @@ namespace CSharpSqlTests
             return tableData;
         }
 
-        public bool IsEqualTo(string value)
-        {
-            string StripInsignificantStuff(string thingToStrip) =>
-                thingToStrip.Replace(" ", string.Empty)
-                    .Replace("\n", string.Empty)
-                    .Replace("\r", string.Empty)
-                    .Replace(Environment.NewLine, string.Empty)
-                    .Replace("-", string.Empty);
-
-            var significantDataFromThis = StripInsignificantStuff(ToMarkdownTableString());
-            var significantDataFromValue = StripInsignificantStuff(value);
-
-            return significantDataFromThis.Equals(significantDataFromValue);
-        }
-
         public bool IsEqualTo(TabularData value, out List<string> differences)
         {
             differences = new List<string>();
@@ -257,6 +242,49 @@ namespace CSharpSqlTests
                     if (thisColValue?.Equals(valueColValue) == false)
                         differences.Add($"Row[{rowIndex}].ColumnValues[{colValueIndex}] is different: <{thisColValue}> vs <{valueColValue}>");
                 }
+            }
+
+            return differences.Count == 0;
+        }
+        
+        public bool Contains(TabularData comparisonData, out List<string> differences)
+        {
+            differences = new List<string>();
+
+            // Return true if this TabularData contains at least the columns and rows in the supplied comparisonData, also return a list of any missing data
+            // i.e. this TabularData con contain more columns and/or rows, but we are only checking against the comparisonData
+
+            foreach (var columnName in comparisonData.Columns)
+            {
+                if(!Columns.Contains(columnName))
+                    differences.Add($"TabularData does not contain a column named {columnName}");
+            }
+
+            // To succeed we need find a row which matches all supplied comparisonData column values
+            // First take a comparisonData row...
+            for (var comparisonRowIndex = 0; comparisonRowIndex < comparisonData.Rows.Count; comparisonRowIndex++)
+            {
+                var comparisonDataRow = comparisonData.Rows[comparisonRowIndex];
+                var rowComparisonSatisfied = false;
+
+                // Then loop through our Rows...
+                foreach (var tabularDataRow in Rows)
+                {
+                    // Now loop through the columns, checking if we have a matching value
+                    for (var colIndex = 0; colIndex < comparisonDataRow.ColumnValues.Count; colIndex++)
+                    {
+                        var comparisonColumnValue = comparisonDataRow.ColumnValues[colIndex];
+
+                        // todo only check the named column ?
+                        if (tabularDataRow.ColumnValues.Contains(comparisonColumnValue))
+                            rowComparisonSatisfied = true;
+                    }
+
+                    if (rowComparisonSatisfied) continue;
+                }
+
+                if(!rowComparisonSatisfied)
+                    differences.Add($"TabularData does not contain a row that contains the values {string.Join(",", comparisonDataRow.ColumnValues)}");
             }
 
             return differences.Count == 0;

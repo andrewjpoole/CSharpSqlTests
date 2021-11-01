@@ -116,5 +116,26 @@ VALUES
             tabularData.Rows[1].ColumnValues[0].Should().Be("valueC");
             tabularData.Rows[1].ColumnValues[1].Should().Be("valueD");
         }
+
+        [Fact]
+        public void Contains_returns_true_given_a_subset_of_row_data_to_natch()
+        {
+            var testString = @" | column1 | column2 |
+                                | --- | --- |
+                                | valueA | valueB |
+                                | valueC | valueD |";
+
+            var tabularData = TabularData.FromMarkdownTableString(testString);
+
+            var subsetString = @" | column1 |
+                                | --- |
+                                | valueC |";
+
+            var subsetOfTabularData = TabularData.FromMarkdownTableString(subsetString);
+
+            var result = tabularData.Contains(subsetOfTabularData, out var differences);
+
+            result.Should().BeTrue();
+        }
     }
 }
