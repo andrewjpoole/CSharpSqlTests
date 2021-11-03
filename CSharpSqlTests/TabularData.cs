@@ -204,55 +204,69 @@ namespace CSharpSqlTests
             return tableData;
         }
 
-        public bool IsEqualTo(TabularData value, out List<string> differences)
+        /// <summary>
+        /// Returns true if this current TabularData exactly matches the supplied comparisonData. i.e. The list of columns matches and the collection of rows and the column values are matches.
+        /// To assert on a subset of data use Contains() instead.
+        /// </summary>
+        /// <param name="comparisonData"></param>
+        /// <param name="differences"></param>
+        /// <returns></returns>
+        public bool IsEqualTo(TabularData comparisonData, out List<string> differences)
         {
             differences = new List<string>();
 
-            if (Columns.Count != value.Columns.Count) 
-                differences.Add($"The number of columns is different: {Columns.Count} vs {value.Columns.Count}");
+            if (Columns.Count != comparisonData.Columns.Count) 
+                differences.Add($"The number of columns is different: {Columns.Count} vs {comparisonData.Columns.Count}");
 
             for (int colIndex = 0; colIndex < Columns.Count; colIndex++)
             {
                 var thisColumn = Columns[colIndex].Trim();
-                var valueColumn = value.Columns[colIndex].Trim();
+                var comparisonColumn = comparisonData.Columns[colIndex].Trim();
 
-                if(thisColumn.Equals(valueColumn) == false)
-                    differences.Add($"Column[{colIndex}] is different: <{thisColumn}> vs <{valueColumn}>");
+                if(thisColumn.Equals(comparisonColumn) == false)
+                    differences.Add($"Column[{colIndex}] is different: <{thisColumn}> vs <{comparisonColumn}>");
             }
 
-            if (Rows.Count != value.Rows.Count)
-                differences.Add($"The number of rows is different: {Rows.Count} vs {value.Rows.Count}");
+            if (Rows.Count != comparisonData.Rows.Count)
+                differences.Add($"The number of rows is different: {Rows.Count} vs {comparisonData.Rows.Count}");
 
             for (int rowIndex = 0; rowIndex < Rows.Count; rowIndex++)
             {
                 var thisRow = Rows[rowIndex];
-                var valueRow = value.Rows[rowIndex];
+                var comparisonDataRow = comparisonData.Rows[rowIndex];
 
-                if (thisRow.ColumnValues.Count != valueRow.ColumnValues.Count)
-                    differences.Add($"Row[{rowIndex}] has different count of RowValues: {thisRow.ColumnValues.Count} vs {valueRow.ColumnValues.Count}");
+                if (thisRow.ColumnValues.Count != comparisonDataRow.ColumnValues.Count)
+                    differences.Add($"Row[{rowIndex}] has different count of RowValues: {thisRow.ColumnValues.Count} vs {comparisonDataRow.ColumnValues.Count}");
                 
                 for (var colValueIndex = 0; colValueIndex < thisRow.ColumnValues.Count; colValueIndex++)
                 {
                     var thisColValue = thisRow.ColumnValues[colValueIndex];
-                    var valueColValue = valueRow.ColumnValues[colValueIndex];
+                    var comparisonColValue = comparisonDataRow.ColumnValues[colValueIndex];
 
-                    if (thisColValue is null && valueColValue is null)
+                    if (thisColValue is null && comparisonColValue is null)
                         continue;
 
-                    if (thisColValue?.Equals(valueColValue) == false)
-                        differences.Add($"Row[{rowIndex}].ColumnValues[{colValueIndex}] is different: <{thisColValue}> vs <{valueColValue}>");
+                    if (thisColValue?.Equals(comparisonColValue) == false)
+                        differences.Add($"Row[{rowIndex}].ColumnValues[{colValueIndex}] is different: <{thisColValue}> vs <{comparisonColValue}>");
                 }
             }
 
             return differences.Count == 0;
         }
-        
+
+        /// <summary>
+        /// Return true if this TabularData contains at least the columns and rows in the supplied comparisonData, also return a list of any missing data
+        /// i.e. this TabularData can contain more columns and/or rows, but we are only checking against the columns and rows in comparisonData.
+        /// If you want an exact match use Equals() instead.
+        /// </summary>
+        /// <param name="comparisonData">A TabularData containing the data that you want to check for inside this TabularData</param>
+        /// <param name="differences">A list of strings that describe rows from the comparisonData which are not satisfied.</param>
+        /// <returns></returns>
         public bool Contains(TabularData comparisonData, out List<string> differences)
         {
             differences = new List<string>();
 
-            // Return true if this TabularData contains at least the columns and rows in the supplied comparisonData, also return a list of any missing data
-            // i.e. this TabularData con contain more columns and/or rows, but we are only checking against the comparisonData
+            
 
             foreach (var columnName in comparisonData.Columns)
             {
@@ -265,25 +279,31 @@ namespace CSharpSqlTests
             for (var comparisonRowIndex = 0; comparisonRowIndex < comparisonData.Rows.Count; comparisonRowIndex++)
             {
                 var comparisonDataRow = comparisonData.Rows[comparisonRowIndex];
-                var rowComparisonSatisfied = false;
+                var comparisonDataRowIsSatisfied = false;
 
                 // Then loop through our Rows...
+                var columnComparisonsSatisfied = 0;
                 foreach (var tabularDataRow in Rows)
                 {
-                    // Now loop through the columns, checking if we have a matching value
-                    for (var colIndex = 0; colIndex < comparisonDataRow.ColumnValues.Count; colIndex++)
+                    // Now loop through the columns, checking if we have a matching comparisonData
+                    for (var colIndex = 0; colIndex < comparisonData.Columns.Count; colIndex++)
                     {
-                        var comparisonColumnValue = comparisonDataRow.ColumnValues[colIndex];
-
-                        // todo only check the named column ?
-                        if (tabularDataRow.ColumnValues.Contains(comparisonColumnValue))
-                            rowComparisonSatisfied = true;
+                        var colName = comparisonData.Columns[colIndex];
+                        var tabularDataColumnIndex = Columns.IndexOf(colName);
+                        
+                        // Compare this column comparisonData (select based on columnName) to the supplied comparisonData
+                        if (tabularDataRow.ColumnValues[tabularDataColumnIndex]!.Equals(comparisonDataRow.ColumnValues[colIndex]))
+                            columnComparisonsSatisfied += 1;
+                        
                     }
 
-                    if (rowComparisonSatisfied) continue;
+                    // If we have incremented columnComparisonsSatisfied to match the count of the columns in comparisonData then we have satisfied the row
+                    if (columnComparisonsSatisfied == comparisonData.Columns.Count)
+                        comparisonDataRowIsSatisfied = true;
+                    
                 }
 
-                if(!rowComparisonSatisfied)
+                if (!comparisonDataRowIsSatisfied)
                     differences.Add($"TabularData does not contain a row that contains the values {string.Join(",", comparisonDataRow.ColumnValues)}");
             }
 
@@ -317,24 +337,6 @@ namespace CSharpSqlTests
             Rows.Add(newRow);
 
             return this;
-        }
-    }
-
-    public static class ObjectExtensions 
-    {
-        public static bool IsNumeric(this object value)
-        {
-            return value is sbyte
-                    || value is byte
-                    || value is short
-                    || value is ushort
-                    || value is int
-                    || value is uint
-                    || value is long
-                    || value is ulong
-                    || value is float
-                    || value is double
-                    || value is decimal;
         }
     }
 }

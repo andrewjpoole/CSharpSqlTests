@@ -101,7 +101,7 @@ public class ThenTests
     }
 
     [Fact]
-    void TheReaderQueryResultsShouldBe_passed_a_markdown_string_compares_LastQueryResult_as_reader_with_string()
+    public void TheReaderQueryResultsShouldBe_passed_a_markdown_string_compares_LastQueryResult_as_reader_with_string()
     {
         var mockContext = new Mock<ILocalDbTestContext>();
 
@@ -130,6 +130,70 @@ public class ThenTests
         var sut = new Then(mockContext.Object);
 
         sut.TheReaderQueryResultsShouldBe(expected);
+    }
+
+    [Fact]
+    public void TheReaderQueryResultsShouldContains_compares_LastQueryResult_as_reader_with_parameter()
+    {
+        var mockContext = new Mock<ILocalDbTestContext>();
+
+        var expected = TabularData.CreateWithColumns("B").AddRowWithValues("pears");
+
+        var mockedReader = new Mock<IDataReader>();
+        var mockedReaderColumnSchemaGen = mockedReader.As<IDbColumnSchemaGenerator>();
+        mockedReaderColumnSchemaGen.Setup(x => x.GetColumnSchema()).Returns(
+            new ReadOnlyCollection<DbColumn>(
+                new List<DbColumn>
+                {
+                    new TestColumn("A"),
+                    new TestColumn("B")
+                }));
+
+        var readToggle = true;
+        mockedReader.Setup(x => x.Read())
+            .Returns(() => readToggle)
+            .Callback(() => readToggle = false);
+
+        mockedReader.Setup(x => x["A"]).Returns("apples");
+        mockedReader.Setup(x => x["B"]).Returns("pears");
+
+        mockContext.Setup(x => x.LastQueryResult).Returns(mockedReader.Object);
+
+        var sut = new Then(mockContext.Object);
+
+        sut.TheReaderQueryResultsShouldContain(expected);
+    }
+
+    [Fact]
+    public void TheReaderQueryResultsShouldContains_compares_LastQueryResult_as_reader_with_string()
+    {
+        var mockContext = new Mock<ILocalDbTestContext>();
+
+        var expected = TabularData.CreateWithColumns("B").AddRowWithValues("pears");
+
+        var mockedReader = new Mock<IDataReader>();
+        var mockedReaderColumnSchemaGen = mockedReader.As<IDbColumnSchemaGenerator>();
+        mockedReaderColumnSchemaGen.Setup(x => x.GetColumnSchema()).Returns(
+            new ReadOnlyCollection<DbColumn>(
+                new List<DbColumn>
+                {
+                    new TestColumn("A"),
+                    new TestColumn("B")
+                }));
+
+        var readToggle = true;
+        mockedReader.Setup(x => x.Read())
+            .Returns(() => readToggle)
+            .Callback(() => readToggle = false);
+
+        mockedReader.Setup(x => x["A"]).Returns("apples");
+        mockedReader.Setup(x => x["B"]).Returns("pears");
+
+        mockContext.Setup(x => x.LastQueryResult).Returns(mockedReader.Object);
+
+        var sut = new Then(mockContext.Object);
+
+        sut.TheReaderQueryResultsShouldContain(expected.ToMarkdownTableString());
     }
 
     [Fact]
