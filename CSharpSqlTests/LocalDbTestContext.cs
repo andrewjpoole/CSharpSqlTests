@@ -37,6 +37,9 @@ namespace CSharpSqlTests
         private string _instanceName;
         private DateTime _instanceStartedTime;
         private DateTime _lastLogTime;
+
+        private string _instancePath =>
+            $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Microsoft\\Microsoft SQL Server Local DB\\Instances\\{_instanceName}";
         
         public IDbConnection SqlConnection { get; private set; }
         public IDbTransaction? SqlTransaction { get; private set; }
@@ -70,7 +73,11 @@ namespace CSharpSqlTests
             dropCmd.ExecuteNonQuery();
 
             var createDbCmd = SqlConnection.CreateCommand();
-            createDbCmd.CommandText = $"CREATE DATABASE {_databaseName}";
+            createDbCmd.CommandText = @$"CREATE DATABASE [{_databaseName}] ON  PRIMARY 
+    ( NAME = N'{_databaseName}_Data', FILENAME = N'{_instancePath}\{_databaseName}.mdf' , SIZE = 10MB , MAXSIZE = 50MB, FILEGROWTH = 5MB )
+     LOG ON 
+    ( NAME = N'{_databaseName}_Log', FILENAME = N'{_instancePath}\{_databaseName}.ldf' , SIZE = 10MB , MAXSIZE = 50MB, FILEGROWTH = 5MB )
+    ";
             createDbCmd.CommandType = CommandType.Text;
             createDbCmd.ExecuteNonQuery();
             
@@ -155,9 +162,7 @@ namespace CSharpSqlTests
             
             LogTiming("instance manager stopped");
             
-            var tempInstanceDir =
-                new DirectoryInfo(
-                    $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Microsoft\\Microsoft SQL Server Local DB\\Instances\\{_instanceName}");
+            var tempInstanceDir = new DirectoryInfo(_instancePath);
 
             tempInstanceDir.Delete(true);
             
