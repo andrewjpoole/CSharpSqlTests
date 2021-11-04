@@ -67,17 +67,11 @@ namespace CSharpSqlTests
             LogTiming("connection opened");
             
             // Create temp database
-            var dropCmd = SqlConnection.CreateCommand();
-            dropCmd.CommandText = $"DROP DATABASE IF EXISTS {_databaseName}";
-            dropCmd.CommandType = CommandType.Text;
-            dropCmd.ExecuteNonQuery();
-
             var createDbCmd = SqlConnection.CreateCommand();
             createDbCmd.CommandText = @$"CREATE DATABASE [{_databaseName}] ON  PRIMARY 
     ( NAME = N'{_databaseName}_Data', FILENAME = N'{_instancePath}\{_databaseName}.mdf' , SIZE = 10MB , MAXSIZE = 50MB, FILEGROWTH = 5MB )
      LOG ON 
-    ( NAME = N'{_databaseName}_Log', FILENAME = N'{_instancePath}\{_databaseName}.ldf' , SIZE = 10MB , MAXSIZE = 50MB, FILEGROWTH = 5MB )
-    ";
+    ( NAME = N'{_databaseName}_Log', FILENAME = N'{_instancePath}\{_databaseName}.ldf' , SIZE = 10MB , MAXSIZE = 50MB, FILEGROWTH = 5MB )";
             createDbCmd.CommandType = CommandType.Text;
             createDbCmd.ExecuteNonQuery();
             

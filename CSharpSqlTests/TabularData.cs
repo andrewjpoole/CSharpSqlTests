@@ -40,20 +40,7 @@ namespace CSharpSqlTests
                 null => DBNull.Value,
                 _ => value.Trim()
             };
-        };        
-
-        //private static Func<object, string> sqlObjectValuesToMarkdownStringValue = sqlValue =>
-        //{
-        //    if (DBNull.Value == sqlValue)
-        //        return "null";
-
-        //    return sqlValue switch
-        //    {
-        //        "" => "emptyString",
-        //        null => "null",
-        //        _ => sqlValue.ToString().Trim()
-        //    };
-        //};
+        };
 
         public static TabularData FromMarkdownTableString(string tableString)
         {
@@ -265,14 +252,15 @@ namespace CSharpSqlTests
         public bool Contains(TabularData comparisonData, out List<string> differences)
         {
             differences = new List<string>();
-
             
-
             foreach (var columnName in comparisonData.Columns)
             {
                 if(!Columns.Contains(columnName))
                     differences.Add($"TabularData does not contain a column named {columnName}");
             }
+
+            if (differences.Any())
+                return false;
 
             // To succeed we need find a row which matches all supplied comparisonData column values
             // First take a comparisonData row...
