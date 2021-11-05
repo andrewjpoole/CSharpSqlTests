@@ -1,19 +1,10 @@
-﻿namespace CSharpSqlTests;
-
-public static class ObjectExtensions 
+﻿namespace CSharpSqlTests
 {
-    public static bool IsNumeric(this object value)
+    public static class ObjectExtensions 
     {
-        return value is sbyte
-               || value is byte
-               || value is short
-               || value is ushort
-               || value is int
-               || value is uint
-               || value is long
-               || value is ulong
-               || value is float
-               || value is double
-               || value is decimal;
+        public static bool IsNumeric(this object value)
+        {
+            return value is sbyte or byte or short or ushort or int or uint or long or ulong or float or double or decimal;
+        }
     }
 }
