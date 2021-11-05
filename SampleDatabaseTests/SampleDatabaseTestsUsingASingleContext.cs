@@ -100,5 +100,27 @@ namespace SampleDatabaseTests
 
             });
         }
+
+        [Fact]
+        public void tabular_data_can_be_specified_using_fluent_api()
+        {
+            _context.RunTest((connection, transaction) =>
+            {
+                var tempData = TabularData
+                    .CreateWithColumns("Id", "Name", "Address")
+                    .AddRowWithValues(1, "Andrew", "emptyString")
+                    .AddRowWithValues(2, "Jo", "null");
+
+                Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
+                    .And().TheFollowingDataExistsInTheTable("Customers", tempData);
+
+                When.UsingThe(_context)
+                    .TheReaderQueryIsExecuted("SELECT * FROM Customers", out var table1Rows);
+
+                Then.UsingThe(_context)
+                    .TheReaderQueryResultsShouldBe(tempData);
+
+            });
+        }
     }
 }

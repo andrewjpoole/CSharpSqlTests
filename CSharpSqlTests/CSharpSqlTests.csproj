@@ -4,7 +4,27 @@
     <TargetFramework>net5.0</TargetFramework>
     <LangVersion>latest</LangVersion>
 	<Nullable>enable</Nullable>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Authors>Andrew Poole</Authors>
+	<Description>A simple framework for running sql tests against a temprary localdb instance, optionally deploying a dacpac, using a nice fluent c# api</Description>
+	<PackageProjectUrl></PackageProjectUrl>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<RepositoryUrl>https://github.com/andrewjpoole/CSharpSqlTests</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageTags>sql testing; stored procedure testing; dacpac testing;</PackageTags>
+	<PackageReleaseNotes>
+		1.0.0) initial version
+	</PackageReleaseNotes>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="6.1.0" />

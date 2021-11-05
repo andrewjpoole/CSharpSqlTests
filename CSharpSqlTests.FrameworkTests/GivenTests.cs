@@ -1,6 +1,8 @@
+using System;
 using System.Data;
 using System.Text;
 using FluentAssertions;
+using Microsoft.Data.SqlClient;
 using Moq;
 using Xunit;
 
@@ -40,7 +42,26 @@ public class GivenTests
         mockCommand.Verify(x => x.ExecuteNonQuery(), Times.Once);
         sb.ToString().Should().StartWith("TheFollowingDataExistsInTheTable executed successfully");
     }
-    
+
+    [Fact]
+    public void TheFollowingDataExistsInTheTable_logs_exceptions_thrown_during_sql_execute()
+    {
+        var sb = new StringBuilder();
+        var mockContext = new Mock<ILocalDbTestContext>();
+        var mockConnection = new Mock<IDbConnection>();
+        var mockCommand = new Mock<IDbCommand>();
+
+        mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
+        mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
+        mockCommand.Setup(x => x.ExecuteNonQuery()).Throws<Exception>();
+
+        var sut = new Given(mockContext.Object, s => sb.AppendLine(s));
+
+        Assert.Throws<Exception>(() => sut.TheFollowingDataExistsInTheTable("tableName", "markdownString "));
+
+        sb.ToString().Should().StartWith("Exception thrown while executing TheFollowingDataExistsInTheTable,");
+    }
+
     [Fact]
     public void TheFollowingSqlStatementIsExecuted_calls_ExecuteNonQueryc_on_cmd()
     {
@@ -57,6 +78,26 @@ public class GivenTests
 
         mockCommand.Verify(x => x.ExecuteNonQuery(), Times.Once);
     }
+    
+    [Fact]
+    public void TheFollowingSqlStatementIsExecuted_logs_exceptions_thrown_during_sql_execute()
+    {
+        var sb = new StringBuilder();
+        var mockContext = new Mock<ILocalDbTestContext>();
+        var mockConnection = new Mock<IDbConnection>();
+        var mockCommand = new Mock<IDbCommand>();
+
+        mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
+        mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
+        mockCommand.Setup(x => x.ExecuteNonQuery()).Throws<Exception>();
+
+        var sut = new Given(mockContext.Object, s => sb.AppendLine(s));
+
+        Assert.Throws<Exception>(() => sut.TheFollowingSqlStatementIsExecuted("select * from blah"));
+
+        sb.ToString().Should().StartWith("Exception thrown while executing TheFollowingSqlStatementIsExecuted,");
+    }
+    
 
     [Fact]
     public void TheForeignKeyConstraintIsRemoved_calls_ExecuteNonQueryc_on_cmd()

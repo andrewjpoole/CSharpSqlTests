@@ -33,12 +33,16 @@ namespace CSharpSqlTests
 
         public Given TheFollowingDataExistsInTheTable(string tableName, string markdownTableString)
         {
+            var tabularData = TabularData.FromMarkdownTableString(markdownTableString);
+            return TheFollowingDataExistsInTheTable(tableName, tabularData);
+        }
+
+        public Given TheFollowingDataExistsInTheTable(string tableName, TabularData tabularData)
+        {
             try
             {
-                var tableData = TabularData.FromMarkdownTableString(markdownTableString);
-
                 var cmd = _context.SqlConnection.CreateCommand();
-                cmd.CommandText = tableData.ToSqlString(tableName);
+                cmd.CommandText = tabularData.ToSqlString(tableName);
                 cmd.CommandType = CommandType.Text;
                 cmd.Transaction = _context.SqlTransaction;
 
@@ -52,7 +56,7 @@ namespace CSharpSqlTests
             {
                 LogMessage($"Exception thrown while executing TheFollowingDataExistsInTheTable, {ex}");
                 throw;
-            }            
+            }
         }
 
         public Given TheForeignKeyConstraintIsRemoved(string tableName, string fkConstraintName) 
