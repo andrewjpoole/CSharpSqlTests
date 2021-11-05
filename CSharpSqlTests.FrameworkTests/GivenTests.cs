@@ -6,127 +6,128 @@ using Microsoft.Data.SqlClient;
 using Moq;
 using Xunit;
 
-namespace CSharpSqlTests.FrameworkTests;
-
-public class GivenTests
+namespace CSharpSqlTests.FrameworkTests
 {
-
-    [Fact]
-    public void TheDacPacIsDeployed_calls_DeployDacpac_on_context()
+    public class GivenTests
     {
-        var sb = new StringBuilder();
-        var context = new Mock<ILocalDbTestContext>();
 
-        var sut = new Given(context.Object, s => sb.AppendLine(s));
+        [Fact]
+        public void TheDacPacIsDeployed_calls_DeployDacpac_on_context()
+        {
+            var sb = new StringBuilder();
+            var context = new Mock<ILocalDbTestContext>();
 
-        sut.TheDacpacIsDeployed("dacpacName");
+            var sut = new Given(context.Object, s => sb.AppendLine(s));
 
-        context.Verify(x => x.DeployDacpac("dacpacName"), Times.Once);
-    }
+            sut.TheDacpacIsDeployed("dacpacName");
 
-    [Fact]
-    public void TheFollowingDataExistsInTheTable_calls_ExecuteNonQueryc_on_cmd_and_writes_log()
-    {
-        var sb = new StringBuilder();
-        var mockContext = new Mock<ILocalDbTestContext>();
-        var mockConnection = new Mock<IDbConnection>();
-        var mockCommand = new Mock<IDbCommand>();
+            context.Verify(x => x.DeployDacpac("dacpacName"), Times.Once);
+        }
 
-        mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
-        mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
+        [Fact]
+        public void TheFollowingDataExistsInTheTable_calls_ExecuteNonQueryc_on_cmd_and_writes_log()
+        {
+            var sb = new StringBuilder();
+            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockConnection = new Mock<IDbConnection>();
+            var mockCommand = new Mock<IDbCommand>();
 
-        var sut = new Given(mockContext.Object, s => sb.AppendLine(s));
+            mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
+            mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
 
-        sut.TheFollowingDataExistsInTheTable("tableName", "markdownString ");
+            var sut = new Given(mockContext.Object, s => sb.AppendLine(s));
 
-        mockCommand.Verify(x => x.ExecuteNonQuery(), Times.Once);
-        sb.ToString().Should().StartWith("TheFollowingDataExistsInTheTable executed successfully");
-    }
+            sut.TheFollowingDataExistsInTheTable("tableName", "markdownString ");
 
-    [Fact]
-    public void TheFollowingDataExistsInTheTable_logs_exceptions_thrown_during_sql_execute()
-    {
-        var sb = new StringBuilder();
-        var mockContext = new Mock<ILocalDbTestContext>();
-        var mockConnection = new Mock<IDbConnection>();
-        var mockCommand = new Mock<IDbCommand>();
+            mockCommand.Verify(x => x.ExecuteNonQuery(), Times.Once);
+            sb.ToString().Should().StartWith("TheFollowingDataExistsInTheTable executed successfully");
+        }
 
-        mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
-        mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
-        mockCommand.Setup(x => x.ExecuteNonQuery()).Throws<Exception>();
+        [Fact]
+        public void TheFollowingDataExistsInTheTable_logs_exceptions_thrown_during_sql_execute()
+        {
+            var sb = new StringBuilder();
+            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockConnection = new Mock<IDbConnection>();
+            var mockCommand = new Mock<IDbCommand>();
 
-        var sut = new Given(mockContext.Object, s => sb.AppendLine(s));
+            mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
+            mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
+            mockCommand.Setup(x => x.ExecuteNonQuery()).Throws<Exception>();
 
-        Assert.Throws<Exception>(() => sut.TheFollowingDataExistsInTheTable("tableName", "markdownString "));
+            var sut = new Given(mockContext.Object, s => sb.AppendLine(s));
 
-        sb.ToString().Should().StartWith("Exception thrown while executing TheFollowingDataExistsInTheTable,");
-    }
+            Assert.Throws<Exception>(() => sut.TheFollowingDataExistsInTheTable("tableName", "markdownString "));
 
-    [Fact]
-    public void TheFollowingSqlStatementIsExecuted_calls_ExecuteNonQueryc_on_cmd()
-    {
-        var mockContext = new Mock<ILocalDbTestContext>();
-        var mockConnection = new Mock<IDbConnection>();
-        var mockCommand = new Mock<IDbCommand>();
+            sb.ToString().Should().StartWith("Exception thrown while executing TheFollowingDataExistsInTheTable,");
+        }
 
-        mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
-        mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
+        [Fact]
+        public void TheFollowingSqlStatementIsExecuted_calls_ExecuteNonQueryc_on_cmd()
+        {
+            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockConnection = new Mock<IDbConnection>();
+            var mockCommand = new Mock<IDbCommand>();
 
-        var sut = new Given(mockContext.Object);
+            mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
+            mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
 
-        sut.TheFollowingSqlStatementIsExecuted("select * from blah");
+            var sut = new Given(mockContext.Object);
 
-        mockCommand.Verify(x => x.ExecuteNonQuery(), Times.Once);
-    }
+            sut.TheFollowingSqlStatementIsExecuted("select * from blah");
+
+            mockCommand.Verify(x => x.ExecuteNonQuery(), Times.Once);
+        }
     
-    [Fact]
-    public void TheFollowingSqlStatementIsExecuted_logs_exceptions_thrown_during_sql_execute()
-    {
-        var sb = new StringBuilder();
-        var mockContext = new Mock<ILocalDbTestContext>();
-        var mockConnection = new Mock<IDbConnection>();
-        var mockCommand = new Mock<IDbCommand>();
+        [Fact]
+        public void TheFollowingSqlStatementIsExecuted_logs_exceptions_thrown_during_sql_execute()
+        {
+            var sb = new StringBuilder();
+            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockConnection = new Mock<IDbConnection>();
+            var mockCommand = new Mock<IDbCommand>();
 
-        mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
-        mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
-        mockCommand.Setup(x => x.ExecuteNonQuery()).Throws<Exception>();
+            mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
+            mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
+            mockCommand.Setup(x => x.ExecuteNonQuery()).Throws<Exception>();
 
-        var sut = new Given(mockContext.Object, s => sb.AppendLine(s));
+            var sut = new Given(mockContext.Object, s => sb.AppendLine(s));
 
-        Assert.Throws<Exception>(() => sut.TheFollowingSqlStatementIsExecuted("select * from blah"));
+            Assert.Throws<Exception>(() => sut.TheFollowingSqlStatementIsExecuted("select * from blah"));
 
-        sb.ToString().Should().StartWith("Exception thrown while executing TheFollowingSqlStatementIsExecuted,");
-    }
+            sb.ToString().Should().StartWith("Exception thrown while executing TheFollowingSqlStatementIsExecuted,");
+        }
     
 
-    [Fact]
-    public void TheForeignKeyConstraintIsRemoved_calls_ExecuteNonQueryc_on_cmd()
-    {
-        var mockContext = new Mock<ILocalDbTestContext>();
-        var mockConnection = new Mock<IDbConnection>();
-        var mockCommand = new Mock<IDbCommand>();
+        [Fact]
+        public void TheForeignKeyConstraintIsRemoved_calls_ExecuteNonQueryc_on_cmd()
+        {
+            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockConnection = new Mock<IDbConnection>();
+            var mockCommand = new Mock<IDbCommand>();
 
-        mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
-        mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
+            mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
+            mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
 
-        var sut = new Given(mockContext.Object);
+            var sut = new Given(mockContext.Object);
 
-        sut.TheForeignKeyConstraintIsRemoved("tableBlah", "fkBlah");
+            sut.TheForeignKeyConstraintIsRemoved("tableBlah", "fkBlah");
 
-        mockCommand.VerifySet(x => x.CommandText = "ALTER TABLE tableBlah DROP CONSTRAINT fkBlah;", Times.Once);
-        mockCommand.Verify(x => x.ExecuteNonQuery(), Times.Once);
-    }
+            mockCommand.VerifySet(x => x.CommandText = "ALTER TABLE tableBlah DROP CONSTRAINT fkBlah;", Times.Once);
+            mockCommand.Verify(x => x.ExecuteNonQuery(), Times.Once);
+        }
 
-    [Fact]
-    public void And_just_returns_the_given()
-    {
-        var sb = new StringBuilder();
-        var context = new Mock<ILocalDbTestContext>();
+        [Fact]
+        public void And_just_returns_the_given()
+        {
+            var sb = new StringBuilder();
+            var context = new Mock<ILocalDbTestContext>();
 
-        var sut = new Given(context.Object, s => sb.AppendLine(s));
+            var sut = new Given(context.Object, s => sb.AppendLine(s));
 
-        var result = sut.And();
+            var result = sut.And();
 
-        result.Should().Be(sut);
+            result.Should().Be(sut);
+        }
     }
 }

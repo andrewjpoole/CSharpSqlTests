@@ -1,7 +1,8 @@
 using System.Data;
 
 namespace CSharpSqlTests
-{ public static class DatabaseExtensions
+{
+    public static class DatabaseExtensions
     {
         public static IDbDataParameter AddParameterWithValue(this IDbCommand cmd, string name, object value)
         {
@@ -24,4 +25,3 @@ namespace CSharpSqlTests
         }
     }
 }
-

@@ -1,11 +1,12 @@
 using System.Data.Common;
 
-namespace CSharpSqlTests.FrameworkTests;
-
-public class TestColumn : DbColumn
+namespace CSharpSqlTests.FrameworkTests
 {
-    public TestColumn(string name)
+    public class TestColumn : DbColumn
     {
-        ColumnName = name;
+        public TestColumn(string name)
+        {
+            ColumnName = name;
+        }
     }
 }

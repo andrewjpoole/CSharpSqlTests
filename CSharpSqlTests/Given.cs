@@ -84,5 +84,5 @@ namespace CSharpSqlTests
                 throw;
             }            
         }
-    }    
+    }
 }

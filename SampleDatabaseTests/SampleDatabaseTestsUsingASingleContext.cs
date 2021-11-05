@@ -64,14 +64,14 @@ namespace SampleDatabaseTests
                     | 23 | 1            | 2021/07/21  | 2021/08/02     | null     | Apples      | 21       | 5.29        | emptyString |";
 
                 Given.UsingThe(_context)
-                .TheFollowingSqlStatementIsExecuted("ALTER TABLE Orders DROP CONSTRAINT FK_Orders_Customers;")
-                .And().TheFollowingDataExistsInTheTable("Orders", expectedOrder);
+                    .TheFollowingSqlStatementIsExecuted("ALTER TABLE Orders DROP CONSTRAINT FK_Orders_Customers;")
+                    .And().TheFollowingDataExistsInTheTable("Orders", expectedOrder);
 
                 When.UsingThe(_context)
-                .TheStoredProcedureIsExecutedWithReader("spFetchOrderById", ("OrderId", 23));
+                    .TheStoredProcedureIsExecutedWithReader("spFetchOrderById", ("OrderId", 23));
 
                 Then.UsingThe(_context)
-                .TheReaderQueryResultsShouldBe(expectedOrder);
+                    .TheReaderQueryResultsShouldBe(expectedOrder);
 
             });
         }

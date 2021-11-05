@@ -2,19 +2,20 @@ using System.Text;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpSqlTests.FrameworkTests;
-
-public class LocalDbContextTests
+namespace CSharpSqlTests.FrameworkTests
 {
-    [Fact]
-    public void Ctor_initialises_new_localdb_instance()
+    public class LocalDbContextTests
     {
-        var sb = new StringBuilder();
+        [Fact]
+        public void Ctor_initialises_new_localdb_instance()
+        {
+            var sb = new StringBuilder();
 
-        var sut = new DacPacInfo("DatabaseToTest");
+            var sut = new DacPacInfo("DatabaseToTest");
 
-        sut.DacPacFound.Should().Be(true);
-        sut.DacPacProjectName.Should().Be("DatabaseToTest");
-        sut.DacPacPath.EndsWith("DatabaseToTest\\bin\\Debug\\DatabaseToTest.dacpac");
+            sut.DacPacFound.Should().Be(true);
+            sut.DacPacProjectName.Should().Be("DatabaseToTest");
+            sut.DacPacPath.EndsWith("DatabaseToTest\\bin\\Debug\\DatabaseToTest.dacpac");
+        }
     }
 }
