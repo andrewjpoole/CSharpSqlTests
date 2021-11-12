@@ -11,11 +11,11 @@ namespace CSharpSqlTests.FrameworkTests
         {
             var sb = new StringBuilder();
 
-            var sut = new DacPacInfo("DatabaseToTest");
+            var sut = new DacPacInfo("SampleDb");
 
             sut.DacPacFound.Should().Be(true);
-            sut.DacPacProjectName.Should().Be("DatabaseToTest");
-            sut.DacPacPath.EndsWith("DatabaseToTest\\bin\\Debug\\DatabaseToTest.dacpac");
+            sut.DacPacProjectName.Should().Be("SampleDb");
+            sut.DacPacPath.EndsWith("SampleDb\\bin\\Debug\\SampleDb.dacpac");
         }
     }
 }

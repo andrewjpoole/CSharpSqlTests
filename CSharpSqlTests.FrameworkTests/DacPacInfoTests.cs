@@ -14,10 +14,10 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void Ctor_finds_existing_dacpac_by_name()
         {
-            var sut = new DacPacInfo("DatabaseToTest");
+            var sut = new DacPacInfo("SampleDb");
 
             sut.DacPacFound.Should().BeTrue();
-            sut.DacPacPath.Should().EndWith("DatabaseToTest.dacpac");
+            sut.DacPacPath.Should().EndWith("SampleDb.dacpac");
         }
 
         [Fact]
@@ -34,12 +34,12 @@ namespace CSharpSqlTests.FrameworkTests
         {
             var currentDirectory = new DirectoryInfo(Assembly.GetExecutingAssembly().Location);
             var solutionDir = currentDirectory.Parent?.Parent?.Parent?.Parent?.Parent;
-            var dacPacs = solutionDir!.EnumerateFiles("DatabaseToTest.dacpac", SearchOption.AllDirectories).ToList();
+            var dacPacs = solutionDir!.EnumerateFiles("SampleDb.dacpac", SearchOption.AllDirectories).ToList();
 
             var sut = new DacPacInfo(dacPacs.First().FullName);
 
             sut.DacPacFound.Should().BeTrue();
-            sut.DacPacPath.Should().EndWith("DatabaseToTest.dacpac");
+            sut.DacPacPath.Should().EndWith("SampleDb.dacpac");
         }
 
         [Fact]

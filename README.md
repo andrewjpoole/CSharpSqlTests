@@ -83,7 +83,7 @@ public class LocalDbContextFixture : IDisposable
 
     public LocalDbContextFixture(IMessageSink sink)
     {
-        Context = new LocalDbTestContext("DatabaseToTest", log => sink.OnMessage(new DiagnosticMessage(log)));
+        Context = new LocalDbTestContext("SampleDb", log => sink.OnMessage(new DiagnosticMessage(log)));
         Context.DeployDacpac();
     }       
 

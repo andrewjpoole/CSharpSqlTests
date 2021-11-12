@@ -1,13 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <LangVersion>latest</LangVersion>
 	<Nullable>enable</Nullable>
-	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<IsPackable>true</IsPackable>
 	<Authors>Andrew Poole</Authors>
 	<Description>A simple framework for running sql tests against a temprary localdb instance, optionally deploying a dacpac, using a nice fluent c# api</Description>
-	<PackageProjectUrl></PackageProjectUrl>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<RepositoryUrl>https://github.com/andrewjpoole/CSharpSqlTests</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
@@ -27,9 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="6.1.0" />
-    <PackageReference Include="MartinCostello.SqlLocalDb" Version="3.0.1" />
-    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="150.5164.1" />
+    <PackageReference Include="FluentAssertions" Version="6.2.0" />
+    <PackageReference Include="MartinCostello.SqlLocalDb" Version="3.1.0" />
+    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="160.5332.1-preview" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="xunit" Version="2.4.1" />
   </ItemGroup>

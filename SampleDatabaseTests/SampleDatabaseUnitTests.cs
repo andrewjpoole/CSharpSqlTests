@@ -9,7 +9,7 @@ namespace SampleDatabaseTests
     public class SampleDatabaseUnitTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private const string DataBaseName = "DatabaseToTest";
+        private const string DataBaseName = "SampleDb";
 
         public SampleDatabaseUnitTests(ITestOutputHelper testOutputHelper)
         {
