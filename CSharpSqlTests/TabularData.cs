@@ -54,12 +54,12 @@ namespace CSharpSqlTests
 
             var tableDefinition = new TabularData();
 
-            var rawLines = tableString.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var rawLines = tableString.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList();
 
             // first, foreach row, remove any instances of 1 or more spaces before a pipe, this allows the tables to be indented inline with the code
             var trimmedLines = rawLines.Select(tableDataLine => Regex.Replace(tableDataLine, "[ ]{1,}\\|", "|")).ToList();
 
-            foreach (var column in trimmedLines[0].Split("|", StringSplitOptions.RemoveEmptyEntries).ToList())
+            foreach (var column in trimmedLines[0].Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries).ToList())
             {
                 tableDefinition.Columns.Add(column.Trim());
             }
@@ -67,7 +67,7 @@ namespace CSharpSqlTests
             foreach (var tableDataRow in trimmedLines.Skip(2))
             {
                 var row = new TabularDataRow();
-                foreach (var columnValue in tableDataRow.Split("|", StringSplitOptions.RemoveEmptyEntries).ToList())
+                foreach (var columnValue in tableDataRow.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries).ToList())
                 {                    
                     row.ColumnValues.Add(markdownStringValuesToSqlObjectValue(columnValue.Trim()));
                 }

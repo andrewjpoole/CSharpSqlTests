@@ -5,7 +5,7 @@ using Xunit;
 
 namespace CSharpSqlTests
 {
-    public class Then
+    public partial class Then
     {
         private readonly ILocalDbTestContext _context;
 

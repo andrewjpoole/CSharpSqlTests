@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using MartinCostello.SqlLocalDb;
@@ -9,22 +10,48 @@ namespace CSharpSqlTests
 {
     public interface ILocalDbTestContext
     {
-        LocalDbTestContext RunTest(Action<IDbConnection, IDbTransaction> useConnection);
-        IDbConnection GetNewSqlConnection();
-
         /// <summary>
-        /// Deploys the latest built dacpac, please not this method does not trigger a build, if you have changes to the dacpac, please manually build them. 
+        /// A method which runs the specified Action, passing the Connection and the Transaction, the Action should contain the code which performs the test.
+        /// A new Transaction is created for the test and will be rolled back afterwards to ensure the tests cannot affect each other.
         /// </summary>
-        /// <param name="dacpacProjectName"></param>
+        LocalDbTestContext RunTest(Action<IDbConnection, IDbTransaction> useConnection);
+        /// <summary>
+        /// A method which returns a new Connection to the temporary localDb instance
+        /// </summary>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
+        IDbConnection GetNewSqlConnection();
+        /// <summary>
+        /// Deploys the latest built dacpac, please not this method does not trigger a build, if you have changes to the dacpac, please manually build them.
+        /// </summary>
+        /// <param name="dacpacProjectName">Optional string which may contain the name of a dacpac project, if not supplied, the name of the database will be used.
+        /// The surrounding directories which be searched for a dacpac project matching the name.
+        /// Alternatively, an absolute path to a *.dacpac file can be specified instead.
+        /// <returns></returns>
         LocalDbTestContext DeployDacpac(string dacpacProjectName = "");
-
+        /// <summary>
+        /// A method which closes any open DataReader, Transaction and/or Connection, shuts down the temporary localDb instance and removes the residual files and folders.
+        /// </summary>
         void TearDown();
-
+        /// <summary>
+        /// A connection to the temporary localDb instance
+        /// </summary>
         IDbConnection SqlConnection { get; }
+        /// <summary>
+        /// An IdbTransaction property which will be assigned a new Transaction each time an individual test runs, 
+        /// it will be rolled back after the test has run to ensure the tests cannot affect each other.
+        /// </summary>
         IDbTransaction? SqlTransaction { get; }
+        /// <summary>
+        /// This object will contain the result of Queries made against the connection, 
+        /// for ExecuteReader() queries it will contain an IDataReader, 
+        /// for ExecuteNonQuery() queries it will contain the number of rows affected,
+        /// When using the When.TheStoredProcedureIsExecutedWithReturnParameter() it will contain the return parameter.
+        /// </summary>
         object? LastQueryResult { get; set; }
+        /// <summary>
+        /// This Dictionary can be used to share state for a test between the Given, When and Then classes.
+        /// </summary>
+        Dictionary<string, object?> State { get; set; }
     }
 
     public class LocalDbTestContext : ILocalDbTestContext
@@ -44,6 +71,8 @@ namespace CSharpSqlTests
         public IDbConnection SqlConnection { get; private set; }
         public IDbTransaction? SqlTransaction { get; private set; }
         public object? LastQueryResult { get; set; }
+
+        public Dictionary<string, object?> State { get; set; } = new();
 
         public LocalDbTestContext(string databaseName, Action<string>? logTiming = null)
         {
@@ -82,6 +111,7 @@ namespace CSharpSqlTests
             // ready to run tests in individual transactions
         }
 
+        /// <inheritdoc />
         public LocalDbTestContext RunTest(Action<IDbConnection, IDbTransaction> useConnection)
         {
             try
@@ -100,6 +130,7 @@ namespace CSharpSqlTests
             return this;
         }
 
+        /// <inheritdoc />
         public IDbConnection GetNewSqlConnection()
         {
             return new SqlConnection(_instance.ConnectionString);
@@ -116,12 +147,7 @@ namespace CSharpSqlTests
             _lastLogTime = DateTime.Now;
         }
 
-        /// <summary>
-        /// Deploys the latest built dacpac, please not this method does not trigger a build, if you have changes to the dacpac, please manually build them. 
-        /// </summary>
-        /// <param name="dacpacProjectName"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
+        /// <inheritdoc />
         public LocalDbTestContext DeployDacpac(string dacpacProjectName = "")
         {
             var dacPacInfo = new DacPacInfo(dacpacProjectName != string.Empty ? dacpacProjectName : _databaseName);
@@ -148,6 +174,7 @@ namespace CSharpSqlTests
             return this;
         }
 
+        /// <inheritdoc />
         public void TearDown()
         {
             LogTiming("tearing down");

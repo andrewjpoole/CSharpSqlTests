@@ -4,7 +4,7 @@ using System.Data;
 
 namespace CSharpSqlTests
 {
-    public class When
+    public partial class When
     {
         private readonly ILocalDbTestContext _context;
         private readonly Action<string>? _logAction;

@@ -4,7 +4,7 @@ using System.Data;
 
 namespace CSharpSqlTests
 {
-    public class Given
+    public partial class Given
     {
         private readonly ILocalDbTestContext _context;
         private readonly Action<string>? _logAction;
@@ -59,7 +59,7 @@ namespace CSharpSqlTests
             }
         }
 
-        public Given TheForeignKeyConstraintIsRemoved(string tableName, string fkConstraintName) 
+        public Given TheForeignKeyConstraintIsRemoved(string tableName, string fkConstraintName)
         {
             return TheFollowingSqlStatementIsExecuted($"ALTER TABLE {tableName} DROP CONSTRAINT {fkConstraintName};");
         }
@@ -82,7 +82,7 @@ namespace CSharpSqlTests
             {
                 LogMessage($"Exception thrown while executing TheFollowingSqlStatementIsExecuted, {ex}");
                 throw;
-            }            
+            }
         }
     }
 }
