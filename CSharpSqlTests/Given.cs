@@ -17,7 +17,7 @@ namespace CSharpSqlTests
 
         public static Given UsingThe(LocalDbTestContext context, Action<string>? logAction = null) => new(context, logAction);
 
-        public Given And() => this;
+        public Given And => this;
 
         private void LogMessage(string message)
         {

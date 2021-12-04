@@ -17,7 +17,7 @@ namespace CSharpSqlTests
 
         public static When UsingThe(ILocalDbTestContext context, Action<string>? logAction = null) => new When(context, logAction);
 
-        public When And() => this;
+        public When And => this;
 
         private void LogMessage(string message)
         {

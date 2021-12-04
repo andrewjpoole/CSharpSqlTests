@@ -125,7 +125,7 @@ namespace CSharpSqlTests.FrameworkTests
 
             var sut = new Given(context.Object, s => sb.AppendLine(s));
 
-            var result = sut.And();
+            var result = sut.And;
 
             result.Should().Be(sut);
         }

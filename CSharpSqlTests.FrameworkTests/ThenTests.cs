@@ -203,7 +203,7 @@ namespace CSharpSqlTests.FrameworkTests
 
             var sut = new Then(context.Object);
 
-            var result = sut.And();
+            var result = sut.And;
 
             result.Should().Be(sut);
         }

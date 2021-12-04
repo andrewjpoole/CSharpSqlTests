@@ -44,7 +44,7 @@ namespace SampleDatabaseTests
                 | 2  | Jo     | null        |";
 
                 Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
-                    .And().TheFollowingDataExistsInTheTable("Customers", tempData);
+                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
                     .TheReaderQueryIsExecuted("SELECT * FROM Customers", out var table1Rows);
@@ -67,7 +67,7 @@ namespace SampleDatabaseTests
 
                 Given.UsingThe(_context)
                     .TheFollowingSqlStatementIsExecuted("ALTER TABLE Orders DROP CONSTRAINT FK_Orders_Customers;")
-                    .And().TheFollowingDataExistsInTheTable("Orders", expectedOrder);
+                    .And.TheFollowingDataExistsInTheTable("Orders", expectedOrder);
 
                 When.UsingThe(_context)
                     .TheStoredProcedureIsExecutedWithReader("spFetchOrderById", ("OrderId", 23));
@@ -90,7 +90,7 @@ namespace SampleDatabaseTests
 
                 Given.UsingThe(_context)
                     .TheFollowingSqlStatementIsExecuted("ALTER TABLE Orders DROP CONSTRAINT FK_Orders_Customers;")
-                    .And().TheFollowingDataExistsInTheTable("Orders", order);
+                    .And.TheFollowingDataExistsInTheTable("Orders", order);
 
                 When.UsingThe(_context)
                     .TheStoredProcedureIsExecutedWithReader("spFetchOrderById", ("OrderId", 23));
@@ -114,7 +114,7 @@ namespace SampleDatabaseTests
                     .AddRowWithValues(2, "Jo", "null");
 
                 Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
-                    .And().TheFollowingDataExistsInTheTable("Customers", tempData);
+                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
                     .TheReaderQueryIsExecuted("SELECT * FROM Customers", out var table1Rows);
@@ -136,7 +136,7 @@ namespace SampleDatabaseTests
                     .AddRowWithValues(2, "Jo", "null");
 
                 Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
-                    .And().TheFollowingDataExistsInTheTable("Customers", tempData);
+                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
                     .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
@@ -158,7 +158,7 @@ namespace SampleDatabaseTests
                     .AddRowWithValues(2, "Jo", "null");
 
                 Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
-                    .And().TheFollowingDataExistsInTheTable("Customers", tempData);
+                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
                     .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
@@ -182,7 +182,7 @@ namespace SampleDatabaseTests
                     .AddRowWithValues(2, "Jo", "null");
 
                 Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
-                    .And().TheFollowingDataExistsInTheTable("Customers", tempData);
+                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
                     .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
@@ -205,7 +205,7 @@ namespace SampleDatabaseTests
                     .AddRowWithValues(2, "Jo", "null");
 
                 Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
-                    .And().TheFollowingDataExistsInTheTable("Customers", tempData);
+                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
                     .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");

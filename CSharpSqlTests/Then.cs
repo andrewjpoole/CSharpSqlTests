@@ -17,7 +17,7 @@ namespace CSharpSqlTests
 
         public static Then UsingThe(ILocalDbTestContext context) => new Then(context);
 
-        public Then And() => this;
+        public Then And => this;
         
         public Then TheNonReaderQueryResultShouldBe(object expected)
         {
