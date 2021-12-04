@@ -47,7 +47,7 @@ namespace SampleDatabaseTests
                     .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
-                    .TheReaderQueryIsExecuted("SELECT * FROM Customers", out var table1Rows);
+                    .TheReaderQueryIsExecuted("SELECT * FROM Customers");
 
                 Then.UsingThe(_context)
                     .TheReaderQueryResultsShouldBe(tempData);
@@ -117,7 +117,7 @@ namespace SampleDatabaseTests
                     .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
-                    .TheReaderQueryIsExecuted("SELECT * FROM Customers", out var table1Rows);
+                    .TheReaderQueryIsExecuted("SELECT * FROM Customers");
 
                 Then.UsingThe(_context)
                     .TheReaderQueryResultsShouldBe(tempData);
@@ -126,7 +126,7 @@ namespace SampleDatabaseTests
         }
 
         [Fact]
-        public void scaler_queries_can_be_used_for_assertion()
+        public void scalar_queries_can_be_used_for_assertion()
         {
             _context.RunTest((connection, transaction) =>
             {
@@ -148,7 +148,7 @@ namespace SampleDatabaseTests
         }
 
         [Fact]
-        public void scaler_queries_can_be_used_for_assertion_using_out_var()
+        public void scalar_queries_can_be_used_for_assertion_using_out_var()
         {
             _context.RunTest((connection, transaction) =>
             {
