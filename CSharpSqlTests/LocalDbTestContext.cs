@@ -29,6 +29,10 @@ namespace CSharpSqlTests
         /// <returns></returns>
         LocalDbTestContext DeployDacpac(string dacpacProjectName = "");
         /// <summary>
+        /// A method which checks if LastQueryResult contains an open IDataReader and closes it.
+        /// </summary>
+        void CloseDataReaderIfOpen();
+        /// <summary>
         /// A method which closes any open DataReader, Transaction and/or Connection, shuts down the temporary localDb instance and removes the residual files and folders.
         /// </summary>
         void TearDown();
@@ -121,13 +125,19 @@ namespace CSharpSqlTests
             }            
             finally 
             {
-                if(LastQueryResult is IDataReader lastQueryResultAsReader)
-                    lastQueryResultAsReader.Close(); // close any open datareaders as they are against the connection and will stuff up other tests
+                CloseDataReaderIfOpen();
 
                 SqlTransaction?.Rollback(); // leave the context untouched for the next test
             }
 
             return this;
+        }
+
+        /// <inheritdoc />
+        public void CloseDataReaderIfOpen()
+        {
+            if (LastQueryResult is IDataReader lastQueryResultAsReader)
+                lastQueryResultAsReader.Close(); // close any open datareaders as they are against the connection and will stuff up other tests
         }
 
         /// <inheritdoc />

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FluentAssertions;
+using System;
 using System.Data;
 using Xunit;
 // ReSharper disable UnusedMember.Local
@@ -84,6 +85,52 @@ namespace CSharpSqlTests
 
             var message = $"Differences:\n{string.Join(Environment.NewLine, differences)}";
             throw new Exception(message);
+        }
+        
+        public Then TheScalarQueryIsExecuted(string cmdText, out object? returnValue)
+        {
+            var cmd = _context.SqlConnection.CreateCommand();
+            cmd.CommandText = cmdText;
+            cmd.CommandType = CommandType.Text;
+            cmd.Transaction = _context.SqlTransaction;
+
+            _context.CloseDataReaderIfOpen();
+
+            returnValue = cmd.ExecuteScalar();
+            
+            return this;
+        }
+
+        public Then TheScalarQueryIsExecuted(string cmdText, Func<object?, bool> assertionUsingQueryResult)
+        {
+            TheScalarQueryIsExecuted(cmdText, out var returnValue);
+
+            assertionUsingQueryResult(returnValue).Should().BeTrue();
+
+            return this;
+        }
+
+        public Then TheReaderQueryIsExecuted(string cmdText, out TabularData returnValue)
+        {
+            var cmd = _context.SqlConnection.CreateCommand();
+            cmd.CommandText = cmdText;
+            cmd.CommandType = CommandType.Text;
+            cmd.Transaction = _context.SqlTransaction;
+
+            _context.CloseDataReaderIfOpen();
+
+            returnValue = TabularData.FromSqlDataReader(cmd.ExecuteReader());
+            
+            return this;
+        }
+
+        public Then TheReaderQueryIsExecuted(string cmdText, Func<TabularData, bool> assertionUsingQueryResult)
+        {
+            TheReaderQueryIsExecuted(cmdText, out var returnValue);
+            
+            assertionUsingQueryResult(returnValue).Should().BeTrue();
+
+            return this;
         }
     }
 }

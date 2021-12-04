@@ -42,16 +42,28 @@ namespace CSharpSqlTests
             };
         };
 
+        /// <summary>
+        /// A method which creates a TabularData from a markdown table string.
+        /// <example>
+        /// <code>
+        ///  | Id | Type | Make | Model   |
+        ///  | -- | ---- | ---- | ------- |
+        ///  | 1  | Car  | Fiat | 500     |
+        ///  | 2  | Van  | Ford | Transit |
+        /// this string represents a table with 4 columns and 2 rows.
+        /// 
+        /// A string value in a column of: 
+        /// 2021-11-03  -> will be interpreted as a DateTime, use any parsable date and time string
+        /// 234         -> will be interpreted as an int
+        /// null        -> will be interpreted as null
+        /// emptyString -> will be interpreted as an empty string
+        /// true        -> will be interpreted as boolean true
+        /// false       -> will be interpreted as boolean false
+        /// </code>
+        /// </example>
+        /// </summary>
         public static TabularData FromMarkdownTableString(string tableString)
         {
-            // example TabularData
-            // | column1 | column2 |
-            // | ------- | ------- |
-            // | valueA  | valueB  |
-            // | valueC  | valueD  |
-            // | valueC  | null    | -> interpret as null
-            // | valueC  | emptyString | -> interpret as empty string
-
             var tableDefinition = new TabularData();
 
             var rawLines = tableString.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -77,6 +89,10 @@ namespace CSharpSqlTests
             return tableDefinition;
         }
 
+        /// <summary>
+        /// A method which renders and returns the contents of a TabularData as a Sql INSERT string.
+        /// </summary>
+        /// <param name="tableName">A string specifying the name of the Table for the INSERT statement.</param>
         public string ToSqlString(string tableName)
         {
             var sb = new StringBuilder();
@@ -136,6 +152,9 @@ namespace CSharpSqlTests
             return sb.ToString();
         }
 
+        /// <summary>
+        /// A method which renders and returns the contents of the TabularData as a markdown table string. 
+        /// </summary>
         public string ToMarkdownTableString()
         {
             var sbColumnNames = new StringBuilder("|");
@@ -160,6 +179,9 @@ namespace CSharpSqlTests
             return $"{sbColumnNames}{Environment.NewLine}{sbColumnAlignment}{sbRows}";
         }
 
+        /// <summary>
+        /// A method which creates a TabularData from the columns and rows returned from an IDataReader, usually the result of a call to ExceuteReader() on an IDbConnection etc. 
+        /// </summary>
         public static TabularData FromSqlDataReader(IDataReader dataReader)
         {
             var tableData = new TabularData();
@@ -188,6 +210,8 @@ namespace CSharpSqlTests
                 tableData.Rows.Add(row);
             }
 
+            dataReader.Close();
+
             return tableData;
         }
 
@@ -195,9 +219,6 @@ namespace CSharpSqlTests
         /// Returns true if this current TabularData exactly matches the supplied comparisonData. i.e. The list of columns matches and the collection of rows and the column values are matches.
         /// To assert on a subset of data use Contains() instead.
         /// </summary>
-        /// <param name="comparisonData"></param>
-        /// <param name="differences"></param>
-        /// <returns></returns>
         public bool IsEqualTo(TabularData comparisonData, out List<string> differences)
         {
             differences = new List<string>();
@@ -242,13 +263,22 @@ namespace CSharpSqlTests
         }
 
         /// <summary>
+        /// Returns true if this current TabularData exactly matches the supplied comparisonData. i.e. The list of columns matches and the collection of rows and the column values are matches.
+        /// To assert on a subset of data use Contains() instead.
+        /// </summary>
+        public bool IsEqualTo(string comparisonTabularDataString, out List<string> differences)
+        {
+            var isEqualTo = IsEqualTo(TabularData.FromMarkdownTableString(comparisonTabularDataString), out var diffs);
+            differences = diffs;
+            return isEqualTo;
+        }
+
+
+        /// <summary>
         /// Return true if this TabularData contains at least the columns and rows in the supplied comparisonData, also return a list of any missing data
         /// i.e. this TabularData can contain more columns and/or rows, but we are only checking against the columns and rows in comparisonData.
         /// If you want an exact match use Equals() instead.
         /// </summary>
-        /// <param name="comparisonData">A TabularData containing the data that you want to check for inside this TabularData</param>
-        /// <param name="differences">A list of strings that describe rows from the comparisonData which are not satisfied.</param>
-        /// <returns></returns>
         public bool Contains(TabularData comparisonData, out List<string> differences)
         {
             differences = new List<string>();
@@ -298,6 +328,21 @@ namespace CSharpSqlTests
             return differences.Count == 0;
         }
 
+        /// <summary>
+        /// Return true if this TabularData contains at least the columns and rows in the supplied comparisonData, also return a list of any missing data
+        /// i.e. this TabularData can contain more columns and/or rows, but we are only checking against the columns and rows in comparisonData.
+        /// If you want an exact match use Equals() instead.
+        /// </summary>
+        public bool Contains(string comparisonTabularDataString, out List<string> differences)
+        {
+            var contains = Contains(TabularData.FromMarkdownTableString(comparisonTabularDataString), out var diffs);
+            differences = diffs;
+            return contains;
+        }
+
+        /// <summary>
+        /// Static builder method for creating a TabularData, specifying a param array of string column names.
+        /// </summary>
         public static TabularData CreateWithColumns(params string[] columns)
         {
             var tableData = new TabularData();
@@ -310,6 +355,10 @@ namespace CSharpSqlTests
             return tableData;
         }
 
+        /// <summary>
+        /// Method for adding a row to a TabularData, specifying the row values as a param array of objects.
+        /// The param array count must equal the number of columns added to the TabularData.
+        /// </summary>
         public TabularData AddRowWithValues(params object[] columnValues)
         {
             if (columnValues.Length != Columns.Count)

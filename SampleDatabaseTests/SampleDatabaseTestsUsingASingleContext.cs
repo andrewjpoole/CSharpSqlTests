@@ -1,4 +1,6 @@
+using System.Linq;
 using CSharpSqlTests;
+using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -119,6 +121,100 @@ namespace SampleDatabaseTests
 
                 Then.UsingThe(_context)
                     .TheReaderQueryResultsShouldBe(tempData);
+
+            });
+        }
+
+        [Fact]
+        public void scaler_queries_can_be_used_for_assertion()
+        {
+            _context.RunTest((connection, transaction) =>
+            {
+                var tempData = TabularData
+                    .CreateWithColumns("Id", "Name", "Address")
+                    .AddRowWithValues(1, "Andrew", "emptyString")
+                    .AddRowWithValues(2, "Jo", "null");
+
+                Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
+                    .And().TheFollowingDataExistsInTheTable("Customers", tempData);
+
+                When.UsingThe(_context)
+                    .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
+
+                Then.UsingThe(_context)
+                    .TheScalarQueryIsExecuted("SELECT COUNT(*) FROM Customers", result => (int)result! == 1);
+
+            });
+        }
+
+        [Fact]
+        public void scaler_queries_can_be_used_for_assertion_using_out_var()
+        {
+            _context.RunTest((connection, transaction) =>
+            {
+                var tempData = TabularData
+                    .CreateWithColumns("Id", "Name", "Address")
+                    .AddRowWithValues(1, "Andrew", "emptyString")
+                    .AddRowWithValues(2, "Jo", "null");
+
+                Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
+                    .And().TheFollowingDataExistsInTheTable("Customers", tempData);
+
+                When.UsingThe(_context)
+                    .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
+
+                Then.UsingThe(_context)
+                    .TheScalarQueryIsExecuted("SELECT COUNT(*) FROM Customers", out var numberOfCustomers);
+
+                numberOfCustomers.Should().Be(1);
+
+            });
+        }
+
+        [Fact]
+        public void reader_queries_can_be_used_for_assertion()
+        {
+            _context.RunTest((connection, transaction) =>
+            {
+                var tempData = TabularData
+                    .CreateWithColumns("Id", "Name", "Address")
+                    .AddRowWithValues(1, "Andrew", "emptyString")
+                    .AddRowWithValues(2, "Jo", "null");
+
+                Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
+                    .And().TheFollowingDataExistsInTheTable("Customers", tempData);
+
+                When.UsingThe(_context)
+                    .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
+
+                Then.UsingThe(_context)
+                    .TheReaderQueryIsExecuted("SELECT * FROM Customers", result => 
+                        result.Contains(TabularData.CreateWithColumns("Id").AddRowWithValues(2), out _));
+
+            });
+        }
+
+        [Fact]
+        public void reader_queries_can_be_used_for_assertion_using_out_var()
+        {
+            _context.RunTest((connection, transaction) =>
+            {
+                var tempData = TabularData
+                    .CreateWithColumns("Id", "Name", "Address")
+                    .AddRowWithValues(1, "Andrew", "emptyString")
+                    .AddRowWithValues(2, "Jo", "null");
+
+                Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
+                    .And().TheFollowingDataExistsInTheTable("Customers", tempData);
+
+                When.UsingThe(_context)
+                    .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
+
+                Then.UsingThe(_context)
+                    .TheReaderQueryIsExecuted("SELECT * FROM Customers", out var result);
+
+                result.Rows.Count.Should().Be(1);
+                result.Rows.First().ColumnValues.First().Should().Be(2);
 
             });
         }
