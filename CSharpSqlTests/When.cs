@@ -4,26 +4,19 @@ using System.Data;
 
 namespace CSharpSqlTests
 {
-    public partial class When
+    public class When
     {
-        private readonly ILocalDbTestContext _context;
-        private readonly Action<string>? _logAction;
+        public readonly ILocalDbTestContext Context;
 
-        public When(ILocalDbTestContext context, Action<string>? logAction = null)
+        public When(ILocalDbTestContext context)
         {
-            _context = context;
-            _logAction = logAction;
+            Context = context;
         }
         
-        public static When UsingThe(ILocalDbTestContext context, Action<string>? logAction = null) => new When(context, logAction);
+        public static When UsingThe(ILocalDbTestContext context) => new When(context);
 
         public When And => this;
-
-        private void LogMessage(string message)
-        {
-            _logAction?.Invoke(message);
-        }
-
+        
         /// <summary>
         /// A method which executes a stored procedure and returns the result as an object.
         /// </summary>
@@ -33,7 +26,7 @@ namespace CSharpSqlTests
         public When TheStoredProcedureIsExecutedWithReturnParameter(string storedProcedureName, out object? returnValue, params (string Name, object Value)[] parameters)
         {
             TheStoredProcedureIsExecutedWithReturnParameter(storedProcedureName, parameters);
-            returnValue = _context.LastQueryResult;
+            returnValue = Context.LastQueryResult;
 
             return this;
         }
@@ -45,10 +38,10 @@ namespace CSharpSqlTests
         /// <param name="parameters">A param array where each param has a string name and an object value.</param>
         public When TheStoredProcedureIsExecutedWithReturnParameter(string storedProcedureName, params (string Name, object Value)[] parameters)
         {
-            var cmd = _context.SqlConnection.CreateCommand();
+            var cmd = Context.SqlConnection.CreateCommand();
             cmd.CommandText = storedProcedureName;
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Transaction = _context.SqlTransaction;
+            cmd.Transaction = Context.SqlTransaction;
 
             foreach (var (name, value) in parameters)
             {
@@ -65,7 +58,7 @@ namespace CSharpSqlTests
 
             cmd.ExecuteNonQuery();
 
-            _context.LastQueryResult = returnParameter.Value;
+            Context.LastQueryResult = returnParameter.Value;
 
             return this;
         }
@@ -77,10 +70,10 @@ namespace CSharpSqlTests
         /// <param name="parameters">A param array where each param has a string name and an object value.</param>
         public When TheStoredProcedureIsExecutedWithReader(string storedProcedureName, params (string Name, object Value)[] parameters)
         {
-            var cmd = _context.SqlConnection.CreateCommand();
+            var cmd = Context.SqlConnection.CreateCommand();
             cmd.CommandText = storedProcedureName;
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Transaction = _context.SqlTransaction;
+            cmd.Transaction = Context.SqlTransaction;
 
             foreach (var (name, value) in parameters)
             {
@@ -90,7 +83,7 @@ namespace CSharpSqlTests
                 cmd.Parameters.Add(param);
             }
             
-            _context.LastQueryResult = cmd.ExecuteReader();
+            Context.LastQueryResult = cmd.ExecuteReader();
             
             return this;
         }
@@ -103,7 +96,7 @@ namespace CSharpSqlTests
         public When TheScalarQueryIsExecuted(string cmdText, out object? returnValue)
         {
             TheScalarQueryIsExecuted(cmdText);
-            returnValue = _context.LastQueryResult;
+            returnValue = Context.LastQueryResult;
 
             return this;
         }
@@ -114,12 +107,12 @@ namespace CSharpSqlTests
         /// <param name="cmdText">The Sql query to execute</param>
         public When TheScalarQueryIsExecuted(string cmdText)
         {
-            var cmd = _context.SqlConnection.CreateCommand();
+            var cmd = Context.SqlConnection.CreateCommand();
             cmd.CommandText = cmdText;
             cmd.CommandType = CommandType.Text;
-            cmd.Transaction = _context.SqlTransaction;
+            cmd.Transaction = Context.SqlTransaction;
 
-            _context.LastQueryResult = cmd.ExecuteScalar();
+            Context.LastQueryResult = cmd.ExecuteScalar();
 
             return this;
         }
@@ -132,7 +125,7 @@ namespace CSharpSqlTests
         public When TheReaderQueryIsExecuted(string cmdText, out IDataReader? returnValue)
         {
             TheReaderQueryIsExecuted(cmdText);
-            returnValue = _context.LastQueryResult! as IDataReader;
+            returnValue = Context.LastQueryResult! as IDataReader;
 
             return this;
         }
@@ -143,12 +136,12 @@ namespace CSharpSqlTests
         /// <param name="cmdText">The Sql query to execute</param>
         public When TheReaderQueryIsExecuted(string cmdText)
         {
-            var cmd = _context.SqlConnection.CreateCommand();
+            var cmd = Context.SqlConnection.CreateCommand();
             cmd.CommandText = cmdText;
             cmd.CommandType = CommandType.Text;
-            cmd.Transaction = _context.SqlTransaction;
+            cmd.Transaction = Context.SqlTransaction;
             
-            _context.LastQueryResult = cmd.ExecuteReader();
+            Context.LastQueryResult = cmd.ExecuteReader();
 
             return this;
         }

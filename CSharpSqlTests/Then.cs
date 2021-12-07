@@ -6,16 +6,16 @@ using Xunit;
 
 namespace CSharpSqlTests
 {
-    public partial class Then
+    public class Then
     {
-        private readonly ILocalDbTestContext _context;
+        public readonly ILocalDbTestContext Context;
 
         public Then(ILocalDbTestContext context)
         {
-            _context = context;
+            Context = context;
         }
 
-        public static Then UsingThe(ILocalDbTestContext context) => new Then(context);
+        public static Then UsingThe(ILocalDbTestContext context) => new(context);
 
         public Then And => this;
 
@@ -25,7 +25,7 @@ namespace CSharpSqlTests
         /// <param name="expected">An object containing the value to assert</param>
         public Then TheNonReaderQueryResultShouldBe(object expected)
         {
-            Assert.True(_context.LastQueryResult?.Equals(expected));
+            Assert.True(Context.LastQueryResult?.Equals(expected));
             return this;
         }
 
@@ -67,10 +67,10 @@ namespace CSharpSqlTests
         /// <param name="expectedData">A TabularData defining the data to assert.</param>
         public Then TheReaderQueryResultsShouldBe(TabularData expectedData)
         {
-            if (_context.LastQueryResult is null)
+            if (Context.LastQueryResult is null)
                 throw new Exception("context.LastQueryResult is null");
 
-            var dataReader = (IDataReader)_context.LastQueryResult;
+            var dataReader = (IDataReader)Context.LastQueryResult;
 
             if (dataReader is null)
                 throw new Exception("context.LastQueryResult does not contain a IDataReader object");
@@ -125,10 +125,10 @@ namespace CSharpSqlTests
         /// <param name="expectedData">A TabularData defining the data to assert.</param>
         public Then TheReaderQueryResultsShouldContain(TabularData expectedData)
         {
-            if (_context.LastQueryResult is null)
+            if (Context.LastQueryResult is null)
                 throw new Exception("context.LastQueryResult is null");
 
-            var dataReader = (IDataReader)_context.LastQueryResult;
+            var dataReader = (IDataReader)Context.LastQueryResult;
 
             if (dataReader is null)
                 throw new Exception("context.LastQueryResult does not contain a IDataReader object");
@@ -152,12 +152,12 @@ namespace CSharpSqlTests
         /// <param name="returnValue">An object containing the query result.</param>
         public Then TheScalarQueryIsExecuted(string cmdText, out object? returnValue)
         {
-            var cmd = _context.SqlConnection.CreateCommand();
+            var cmd = Context.SqlConnection.CreateCommand();
             cmd.CommandText = cmdText;
             cmd.CommandType = CommandType.Text;
-            cmd.Transaction = _context.SqlTransaction;
+            cmd.Transaction = Context.SqlTransaction;
 
-            _context.CloseDataReaderIfOpen();
+            Context.CloseDataReaderIfOpen();
 
             returnValue = cmd.ExecuteScalar();
             
@@ -185,12 +185,12 @@ namespace CSharpSqlTests
         /// <param name="returnValue">A TabularData containing the results of the query to assert</param>
         public Then TheReaderQueryIsExecuted(string cmdText, out TabularData returnValue)
         {
-            var cmd = _context.SqlConnection.CreateCommand();
+            var cmd = Context.SqlConnection.CreateCommand();
             cmd.CommandText = cmdText;
             cmd.CommandType = CommandType.Text;
-            cmd.Transaction = _context.SqlTransaction;
+            cmd.Transaction = Context.SqlTransaction;
 
-            _context.CloseDataReaderIfOpen();
+            Context.CloseDataReaderIfOpen();
 
             returnValue = TabularData.FromSqlDataReader(cmd.ExecuteReader());
             

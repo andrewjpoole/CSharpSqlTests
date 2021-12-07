@@ -12,13 +12,17 @@
 	<RepositoryUrl>https://github.com/andrewjpoole/CSharpSqlTests</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
 	<PackageTags>sql testing; stored procedure testing; dacpac testing;</PackageTags>
-	<Version>1.1.0</Version>
+	<Version>1.2.0</Version>
 	<PackageReleaseNotes>
+		1.2.0) Then has some new query methods. Given, When and Then now have a public context to allow the use of extension methods, PDBs included in package for debugging.
 		1.1.0) targeted netstandard2, made Given, When and Then classes partial and added some triple slash comments.
 		1.0.0) initial version
 	</PackageReleaseNotes>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<IncludeSymbols>true</IncludeSymbols>
+	<EmbedAllSources>true</EmbedAllSources>
+	  
   </PropertyGroup>
 
   <ItemGroup>

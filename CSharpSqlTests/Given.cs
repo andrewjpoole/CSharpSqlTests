@@ -4,33 +4,26 @@ using System.Data;
 
 namespace CSharpSqlTests
 {
-    public partial class Given
+    public class Given
     {
-        private readonly ILocalDbTestContext _context;
-        private readonly Action<string>? _logAction;
+        public readonly ILocalDbTestContext Context;
 
-        public Given(ILocalDbTestContext context, Action<string>? logAction = null)
+        public Given(ILocalDbTestContext context)
         {
-            _context = context;
-            _logAction = logAction;
+            Context = context;
         }
 
-        public static Given UsingThe(LocalDbTestContext context, Action<string>? logAction = null) => new(context, logAction);
+        public static Given UsingThe(LocalDbTestContext context) => new(context);
 
         public Given And => this;
-
-        private void LogMessage(string message)
-        {
-            _logAction?.Invoke(message);
-        }
-
+        
         /// <summary>
         /// A method which deploys a DacPac into the localDb context.
         /// </summary>
         /// <param name="dacpacProjectName">A string containing the name of a DacPac file to deploy, this can be an absolute path or a name to search for minus the extension.</param>
         public Given TheDacpacIsDeployed(string dacpacProjectName = "")
         {
-            _context.DeployDacpac(dacpacProjectName);
+            Context.DeployDacpac(dacpacProjectName);
 
             return this;
         }
@@ -72,24 +65,14 @@ namespace CSharpSqlTests
         /// <param name="tabularData">A TabularData containing the data to insert.</param>
         public Given TheFollowingDataExistsInTheTable(string tableName, TabularData tabularData)
         {
-            try
-            {
-                var cmd = _context.SqlConnection.CreateCommand();
-                cmd.CommandText = tabularData.ToSqlString(tableName);
-                cmd.CommandType = CommandType.Text;
-                cmd.Transaction = _context.SqlTransaction;
+            var cmd = Context.SqlConnection.CreateCommand();
+            cmd.CommandText = tabularData.ToSqlString(tableName);
+            cmd.CommandType = CommandType.Text;
+            cmd.Transaction = Context.SqlTransaction;
 
-                _context.LastQueryResult = cmd.ExecuteNonQuery();
+            Context.LastQueryResult = cmd.ExecuteNonQuery();
 
-                LogMessage("TheFollowingDataExistsInTheTable executed successfully");
-
-                return this;
-            }
-            catch (Exception ex)
-            {
-                LogMessage($"Exception thrown while executing TheFollowingDataExistsInTheTable, {ex}");
-                throw;
-            }
+            return this;
         }
 
         /// <summary>
@@ -108,23 +91,13 @@ namespace CSharpSqlTests
         /// <param name="sql">A string containing the Sql statement to execute.</param>
         public Given TheFollowingSqlStatementIsExecuted(string sql)
         {
-            try
-            {
-                var cmd = _context.SqlConnection.CreateCommand();
-                cmd.CommandText = sql;
-                cmd.CommandType = CommandType.Text;
-                cmd.Transaction = _context.SqlTransaction;
+            var cmd = Context.SqlConnection.CreateCommand();
+            cmd.CommandText = sql;
+            cmd.CommandType = CommandType.Text;
+            cmd.Transaction = Context.SqlTransaction;
 
-                _context.LastQueryResult = cmd.ExecuteNonQuery();
-
-                LogMessage("TheFollowingSqlStatementIsExecuted executed successfully");
-                return this;
-            }
-            catch (Exception ex)
-            {
-                LogMessage($"Exception thrown while executing TheFollowingSqlStatementIsExecuted, {ex}");
-                throw;
-            }
+            Context.LastQueryResult = cmd.ExecuteNonQuery();
+            return this;
         }
     }
 }

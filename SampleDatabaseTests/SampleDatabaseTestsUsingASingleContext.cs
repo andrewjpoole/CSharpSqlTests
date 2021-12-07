@@ -43,7 +43,7 @@ namespace SampleDatabaseTests
                 | 1  | Andrew | emptyString |
                 | 2  | Jo     | null        |";
 
-                Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
+                Given.UsingThe(_context)
                     .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
@@ -113,7 +113,7 @@ namespace SampleDatabaseTests
                     .AddRowWithValues(1, "Andrew", "emptyString")
                     .AddRowWithValues(2, "Jo", "null");
 
-                Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
+                Given.UsingThe(_context)
                     .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
@@ -135,7 +135,7 @@ namespace SampleDatabaseTests
                     .AddRowWithValues(1, "Andrew", "emptyString")
                     .AddRowWithValues(2, "Jo", "null");
 
-                Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
+                Given.UsingThe(_context)
                     .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
@@ -157,7 +157,7 @@ namespace SampleDatabaseTests
                     .AddRowWithValues(1, "Andrew", "emptyString")
                     .AddRowWithValues(2, "Jo", "null");
 
-                Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
+                Given.UsingThe(_context)
                     .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
@@ -181,7 +181,7 @@ namespace SampleDatabaseTests
                     .AddRowWithValues(1, "Andrew", "emptyString")
                     .AddRowWithValues(2, "Jo", "null");
 
-                Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
+                Given.UsingThe(_context)
                     .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
@@ -204,7 +204,7 @@ namespace SampleDatabaseTests
                     .AddRowWithValues(1, "Andrew", "emptyString")
                     .AddRowWithValues(2, "Jo", "null");
 
-                Given.UsingThe(_context, message => _testOutputHelper.WriteLine(message))
+                Given.UsingThe(_context)
                     .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
                 When.UsingThe(_context)
