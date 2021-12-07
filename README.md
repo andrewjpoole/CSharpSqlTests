@@ -57,7 +57,7 @@ public class SampleDatabaseTestsUsingASingleContext : IClassFixture<LocalDbConte
 
             Given.UsingThe(_context)
             .TheFollowingSqlStatementIsExecuted("ALTER TABLE Orders DROP CONSTRAINT FK_Orders_Customers;")
-            .And().TheFollowingDataExistsInTheTable("Orders", expectedOrder);
+            .And.TheFollowingDataExistsInTheTable("Orders", expectedOrder);
 
             When.UsingThe(_context)
             .TheStoredProcedureIsExecutedWithReader("spFetchOrderById", ("OrderId", 23));
@@ -84,12 +84,12 @@ public class LocalDbContextFixture : IDisposable
     public LocalDbContextFixture(IMessageSink sink)
     {
         Context = new LocalDbTestContext("SampleDb", log => sink.OnMessage(new DiagnosticMessage(log)));
-        Context.DeployDacpac();
+        Context.DeployDacpac(); // If the DacPac name does not match the database name, pass the DacPac name in here, or an absolute path to the file.
     }       
 
     public void Dispose()
     {
-        Context.TearDown();
+        Context.TearDown(); // this closes connections and tidies up the temporary localDb instance
     }
 }
 

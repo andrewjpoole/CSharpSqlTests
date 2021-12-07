@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 using System.Text;
 using FluentAssertions;
 using Moq;
@@ -31,25 +32,7 @@ namespace CSharpSqlTests.FrameworkTests
 
             var expected = TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears");
 
-            var mockedReader = new Mock<IDataReader>();
-            var mockedReaderColumnSchemaGen = mockedReader.As<IDbColumnSchemaGenerator>();
-            mockedReaderColumnSchemaGen.Setup(x => x.GetColumnSchema()).Returns(
-                new ReadOnlyCollection<DbColumn>(
-                    new List<DbColumn>
-                    {
-                        new TestColumn("A"),
-                        new TestColumn("B")
-                    }));
-
-            var readToggle = true;
-            mockedReader.Setup(x => x.Read())
-                .Returns(() => readToggle)
-                .Callback(() => readToggle = false);
-
-            mockedReader.Setup(x => x["A"]).Returns("apples");
-            mockedReader.Setup(x => x["B"]).Returns("pears");
-
-            mockContext.Setup(x => x.LastQueryResult).Returns(mockedReader.Object);
+            mockContext.Setup(x => x.LastQueryResult).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
 
             var sut = new Then(mockContext.Object);
 
@@ -62,26 +45,8 @@ namespace CSharpSqlTests.FrameworkTests
             var mockContext = new Mock<ILocalDbTestContext>();
 
             var expected = TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears");
-
-            var mockedReader = new Mock<IDataReader>();
-            var mockedReaderColumnSchemaGen = mockedReader.As<IDbColumnSchemaGenerator>();
-            mockedReaderColumnSchemaGen.Setup(x => x.GetColumnSchema()).Returns(
-                new ReadOnlyCollection<DbColumn>(
-                    new List<DbColumn>
-                    {
-                        new TestColumn("A"),
-                        new TestColumn("B")
-                    }));
-
-            var readToggle = true;
-            mockedReader.Setup(x => x.Read())
-                .Returns(() => readToggle)
-                .Callback(() => readToggle = false);
-
-            mockedReader.Setup(x => x["A"]).Returns("fred");
-            mockedReader.Setup(x => x["B"]).Returns("george");
-
-            mockContext.Setup(x => x.LastQueryResult).Returns(mockedReader.Object);
+            
+            mockContext.Setup(x => x.LastQueryResult).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("fred", "george")).Object);
 
             var sut = new Then(mockContext.Object);
 
@@ -107,25 +72,7 @@ namespace CSharpSqlTests.FrameworkTests
 
             var expected = TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears").ToMarkdownTableString();
 
-            var mockedReader = new Mock<IDataReader>();
-            var mockedReaderColumnSchemaGen = mockedReader.As<IDbColumnSchemaGenerator>();
-            mockedReaderColumnSchemaGen.Setup(x => x.GetColumnSchema()).Returns(
-                new ReadOnlyCollection<DbColumn>(
-                    new List<DbColumn>
-                    {
-                        new TestColumn("A"),
-                        new TestColumn("B")
-                    }));
-
-            var readToggle = true;
-            mockedReader.Setup(x => x.Read())
-                .Returns(() => readToggle)
-                .Callback(() => readToggle = false);
-
-            mockedReader.Setup(x => x["A"]).Returns("apples");
-            mockedReader.Setup(x => x["B"]).Returns("pears");
-
-            mockContext.Setup(x => x.LastQueryResult).Returns(mockedReader.Object);
+            mockContext.Setup(x => x.LastQueryResult).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
 
             var sut = new Then(mockContext.Object);
 
@@ -139,25 +86,7 @@ namespace CSharpSqlTests.FrameworkTests
 
             var expected = TabularData.CreateWithColumns("B").AddRowWithValues("pears");
 
-            var mockedReader = new Mock<IDataReader>();
-            var mockedReaderColumnSchemaGen = mockedReader.As<IDbColumnSchemaGenerator>();
-            mockedReaderColumnSchemaGen.Setup(x => x.GetColumnSchema()).Returns(
-                new ReadOnlyCollection<DbColumn>(
-                    new List<DbColumn>
-                    {
-                        new TestColumn("A"),
-                        new TestColumn("B")
-                    }));
-
-            var readToggle = true;
-            mockedReader.Setup(x => x.Read())
-                .Returns(() => readToggle)
-                .Callback(() => readToggle = false);
-
-            mockedReader.Setup(x => x["A"]).Returns("apples");
-            mockedReader.Setup(x => x["B"]).Returns("pears");
-
-            mockContext.Setup(x => x.LastQueryResult).Returns(mockedReader.Object);
+            mockContext.Setup(x => x.LastQueryResult).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
 
             var sut = new Then(mockContext.Object);
 
@@ -170,30 +99,89 @@ namespace CSharpSqlTests.FrameworkTests
             var mockContext = new Mock<ILocalDbTestContext>();
 
             var expected = TabularData.CreateWithColumns("B").AddRowWithValues("pears");
+            
+            mockContext.Setup(x => x.LastQueryResult).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
 
+            var sut = new Then(mockContext.Object);
+
+            sut.TheReaderQueryResultsShouldContain(expected.ToMarkdownTableString());
+        }
+
+        [Fact]
+        public void TheReaderQueryIsExecutedAndIsEqualTo_asserts_that_the_query_is_equal_to_the_supplied_TabularData_string()
+        {
+            var (mockContext, mockCmd) = GetMockedContext();
+
+            var expected = TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears");
+
+            mockCmd.Setup(x => x.ExecuteReader()).Returns(SetupDataReader(expected).Object);
+
+            var sut = new Then(mockContext.Object);
+
+            sut.TheReaderQueryIsExecutedAndIsEqualTo("", expected.ToMarkdownTableString());
+
+            mockCmd.Verify(x => x.ExecuteReader(), Times.Once);
+        }
+
+        [Fact]
+        public void TheReaderQueryIsExecutedAndContains_asserts_that_the_query_is_equal_to_the_supplied_TabularData_string()
+        {
+            var (mockContext, mockCmd) = GetMockedContext();
+            
+            mockCmd.Setup(x => x.ExecuteReader()).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
+
+            var sut = new Then(mockContext.Object);
+
+            var expected = TabularData.CreateWithColumns("B").AddRowWithValues("pears").ToMarkdownTableString();
+
+            sut.TheReaderQueryIsExecutedAndContains("", expected);
+
+            mockCmd.Verify(x => x.ExecuteReader(), Times.Once);
+
+        }
+
+        private (Mock<ILocalDbTestContext> MockContext, Mock<IDbCommand> MockCommand) GetMockedContext()
+        {
+            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockParam = new Mock<IDbDataParameter>();
+            var mockCmd = new Mock<IDbCommand>();
+            var mockParamCollection = new Mock<IDataParameterCollection>();
+            var mockDbConnection = new Mock<IDbConnection>();
+
+            mockCmd.Setup(x => x.CreateParameter()).Returns(mockParam.Object);
+            mockCmd.Setup(x => x.Parameters).Returns(mockParamCollection.Object);
+            mockDbConnection.Setup(x => x.CreateCommand()).Returns(mockCmd.Object);
+            mockContext.Setup(x => x.SqlConnection).Returns(mockDbConnection.Object);
+
+            return (mockContext, mockCmd);
+        }
+
+        private Mock<IDataReader> SetupDataReader(TabularData dataToReturn)
+        {
             var mockedReader = new Mock<IDataReader>();
             var mockedReaderColumnSchemaGen = mockedReader.As<IDbColumnSchemaGenerator>();
+
+            var columns = dataToReturn.Columns.Select(columnName => new TestColumn(columnName)).ToList<DbColumn>();
+
             mockedReaderColumnSchemaGen.Setup(x => x.GetColumnSchema()).Returns(
-                new ReadOnlyCollection<DbColumn>(
-                    new List<DbColumn>
-                    {
-                        new TestColumn("A"),
-                        new TestColumn("B")
-                    }));
+                new ReadOnlyCollection<DbColumn>(columns));
 
             var readToggle = true;
             mockedReader.Setup(x => x.Read())
                 .Returns(() => readToggle)
                 .Callback(() => readToggle = false);
+            
+            foreach (var tabularDataRow in dataToReturn.Rows)
+            {
+                foreach (var columnName in dataToReturn.Columns)
+                {
+                    var columnIndex = dataToReturn.Columns.IndexOf(columnName);
+                    mockedReader.Setup(x => x[columnName]).Returns(tabularDataRow.ColumnValues[columnIndex]);
+                }
+            }
 
-            mockedReader.Setup(x => x["A"]).Returns("apples");
-            mockedReader.Setup(x => x["B"]).Returns("pears");
-
-            mockContext.Setup(x => x.LastQueryResult).Returns(mockedReader.Object);
-
-            var sut = new Then(mockContext.Object);
-
-            sut.TheReaderQueryResultsShouldContain(expected.ToMarkdownTableString());
+            //mockCmd.Setup(x => x.ExecuteReader()).Returns(mockedReader.Object);
+            return mockedReader;
         }
 
         [Fact]

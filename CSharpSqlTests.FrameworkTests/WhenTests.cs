@@ -107,6 +107,18 @@ namespace CSharpSqlTests.FrameworkTests
         }
 
         [Fact]
+        public void TheStoredProcedureIsExecuted_executes_a_nonquery_stored_procedure()
+        {
+            var mockReader = new Mock<IDataReader>();
+            _mockCmd.Setup(x => x.ExecuteNonQuery()).Returns(2);
+            _sut.TheStoredProcedureIsExecuted("spTest", out var affectedRows, ("Input", 12));
+
+            _mockDbConnection.Verify(x => x.CreateCommand(), Times.Once);
+            _mockCmd.Verify(x => x.ExecuteNonQuery(), Times.Once);
+            affectedRows.Should().Be(2);
+        }
+
+        [Fact]
         public void And_just_returns_the_when()
         {
             var context = new Mock<ILocalDbTestContext>();

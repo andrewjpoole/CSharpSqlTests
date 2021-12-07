@@ -43,6 +43,23 @@ namespace CSharpSqlTests
         };
 
         /// <summary>
+        /// A method which returns the object from a given column and row.
+        /// </summary>
+        /// <param name="columnName">A string containing the name of the column.</param>
+        /// <param name="row">A zero based row index, defaults to 0 which is the first row.</param>
+        /// <returns>The ColumnValue object, which may be null.</returns>
+        /// <exception cref="Exception"></exception>
+        public object? ValueAt(string columnName, int row = 1)
+        {
+            var columnIndex = Columns.IndexOf(columnName);
+
+            if (columnIndex == -1)
+                throw new Exception($"could not find a Column named {columnName}");
+
+            return Rows[row].ColumnValues[columnIndex];
+        }
+
+        /// <summary>
         /// A method which creates a TabularData from a markdown table string.
         /// <example>
         /// <code>

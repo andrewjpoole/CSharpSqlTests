@@ -218,5 +218,49 @@ namespace SampleDatabaseTests
 
             });
         }
+        
+        [Fact]
+        public void reader_queries_can_be_used_for_assertion_using_TheReaderQueryIsExecutedAndIsEqualTo()
+        {
+            _context.RunTest((connection, transaction) =>
+            {
+                var tempData = TabularData
+                    .CreateWithColumns("Id", "Name", "Address")
+                    .AddRowWithValues(1, "Andrew", "emptyString")
+                    .AddRowWithValues(2, "Jo", "null");
+
+                Given.UsingThe(_context)
+                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
+
+                When.UsingThe(_context)
+                    .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
+
+                Then.UsingThe(_context)
+                    .TheReaderQueryIsExecutedAndIsEqualTo("SELECT * FROM Customers", TabularData.CreateWithColumns("Id", "Name", "Address").AddRowWithValues(2, "Jo", "null").ToMarkdownTableString());
+
+            });
+        }
+
+        [Fact]
+        public void reader_queries_can_be_used_for_assertion_using_TheReaderQueryIsExecutedAndContains()
+        {
+            _context.RunTest((connection, transaction) =>
+            {
+                var tempData = TabularData
+                    .CreateWithColumns("Id", "Name", "Address")
+                    .AddRowWithValues(1, "Andrew", "emptyString")
+                    .AddRowWithValues(2, "Jo", "null");
+
+                Given.UsingThe(_context)
+                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
+
+                When.UsingThe(_context)
+                    .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
+
+                Then.UsingThe(_context)
+                    .TheReaderQueryIsExecutedAndContains("SELECT * FROM Customers", TabularData.CreateWithColumns("Id", "Name").AddRowWithValues(2, "Jo").ToMarkdownTableString());
+
+            });
+        }
     }
 }

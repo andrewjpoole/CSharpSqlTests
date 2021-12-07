@@ -49,7 +49,7 @@ namespace CSharpSqlTests
         /// This object will contain the result of Queries made against the connection, 
         /// for ExecuteReader() queries it will contain an IDataReader, 
         /// for ExecuteNonQuery() queries it will contain the number of rows affected,
-        /// When using the When.TheStoredProcedureIsExecutedWithReturnParameter() it will contain the return parameter.
+        /// When using the When.TheStoredProcedureIsExecuted() it will contain the return parameter.
         /// </summary>
         object? LastQueryResult { get; set; }
         /// <summary>

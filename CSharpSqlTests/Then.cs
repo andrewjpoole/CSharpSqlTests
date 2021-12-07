@@ -173,7 +173,7 @@ namespace CSharpSqlTests
         {
             TheScalarQueryIsExecuted(cmdText, out var returnValue);
 
-            assertionUsingQueryResult(returnValue).Should().BeTrue();
+            Assert.True(assertionUsingQueryResult(returnValue), "Func assertionUsingQueryResult did not evaluate to true");
 
             return this;
         }
@@ -196,7 +196,7 @@ namespace CSharpSqlTests
             
             return this;
         }
-
+        
         /// <summary>
         /// A method which executes a Sql reader query and evaluates an assertion using the supplied Func.
         /// </summary>
@@ -206,9 +206,85 @@ namespace CSharpSqlTests
         {
             TheReaderQueryIsExecuted(cmdText, out var returnValue);
             
-            assertionUsingQueryResult(returnValue).Should().BeTrue();
+            Assert.True(assertionUsingQueryResult(returnValue), "Func assertionUsingQueryResult did not evaluate to true");
 
             return this;
+        }
+
+        /// <summary>
+        /// A method which executes a reader query and asserts that result should be equal to the supplied tabular data.
+        /// </summary>
+        /// <param name="cmdText">A string containing the Sql query</param>
+        /// <param name="expectedMarkDownTableString">
+        /// A markdown table string containing the data to assert
+        /// <example>
+        /// <code>
+        ///  | Id | Type | Make | Model   |
+        ///  | -- | ---- | ---- | ------- |
+        ///  | 1  | Car  | Fiat | 500     |
+        ///  | 2  | Van  | Ford | Transit |
+        /// this string represents a table with 4 columns and 2 rows.
+        /// 
+        /// A string value in a column of: 
+        /// 2021-11-03  -> will be interpreted as a DateTime, use any parsable date and time string
+        /// 234         -> will be interpreted as an int
+        /// null        -> will be interpreted as null
+        /// emptyString -> will be interpreted as an empty string
+        /// true        -> will be interpreted as boolean true
+        /// false       -> will be interpreted as boolean false
+        /// </code>
+        /// </example>
+        /// </param>
+        public Then TheReaderQueryIsExecutedAndIsEqualTo(string cmdText, string expectedMarkDownTableString)
+        {
+            TheReaderQueryIsExecuted(cmdText, out var returnValue);
+
+            var expected = TabularData.FromMarkdownTableString(expectedMarkDownTableString);
+
+            var areEqual = returnValue.IsEqualTo(expected, out var differences);
+
+            if (areEqual) return this;
+
+            var message = $"Differences:\n{string.Join(Environment.NewLine, differences)}";
+            throw new Exception(message);
+        }
+
+        /// <summary>
+        /// A method which executes a reader query and asserts that result should contain the supplied tabular data.
+        /// </summary>
+        /// <param name="cmdText">A string containing the Sql query</param>
+        /// <param name="expectedMarkDownTableString">
+        /// A markdown table string containing the data to assert
+        /// <example>
+        /// <code>
+        ///  | Id | Type | Make | Model   |
+        ///  | -- | ---- | ---- | ------- |
+        ///  | 1  | Car  | Fiat | 500     |
+        ///  | 2  | Van  | Ford | Transit |
+        /// this string represents a table with 4 columns and 2 rows.
+        /// 
+        /// A string value in a column of: 
+        /// 2021-11-03  -> will be interpreted as a DateTime, use any parsable date and time string
+        /// 234         -> will be interpreted as an int
+        /// null        -> will be interpreted as null
+        /// emptyString -> will be interpreted as an empty string
+        /// true        -> will be interpreted as boolean true
+        /// false       -> will be interpreted as boolean false
+        /// </code>
+        /// </example>
+        /// </param>
+        public Then TheReaderQueryIsExecutedAndContains(string cmdText, string expectedMarkDownTableString)
+        {
+            TheReaderQueryIsExecuted(cmdText, out var returnValue);
+
+            var expected = TabularData.FromMarkdownTableString(expectedMarkDownTableString);
+
+            var contains = returnValue.Contains(expected, out var differences);
+
+            if (contains) return this;
+
+            var message = $"Missing data:\n{string.Join(Environment.NewLine, differences)}";
+            throw new Exception(message);
         }
     }
 }
