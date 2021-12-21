@@ -5,7 +5,6 @@ using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Data.SqlClient;
 
 namespace CSharpSqlTests
 {
@@ -43,13 +42,47 @@ namespace CSharpSqlTests
         };
 
         /// <summary>
+        /// A method which returns the index of a column based on the supplied column name
+        /// </summary>
+        /// <param name="columnName">The name of the column that you want to know the index of.</param>
+        /// <exception cref="Exception">Thrown if no column can be found with the supplied name.</exception>
+        public int IndexOfColumnNamed(string columnName)
+        {
+            var index = Columns.IndexOf(columnName);
+            if (index == -1)
+                throw new Exception($"Counld not find a column with the supplied name of {columnName}");
+
+            return index;
+        }
+
+        /// <summary>
+        /// A method which returns the first row which matches the supplied condition
+        /// </summary>
+        /// <param name="columnName">A string containing the name of the column to search.</param>
+        /// <param name="value">An object containing the value to search for in the specified column.</param>
+        /// <exception cref="Exception">Thrown if no rows can be found which match the condition.</exception>
+        public TabularDataRow RowWhere(string columnName, object value)
+        {
+            var columnIndex = IndexOfColumnNamed(columnName);
+            
+            foreach (var tabularDataRow in Rows)
+            {
+                if (tabularDataRow.ColumnValues[columnIndex].Equals(value))
+                    return tabularDataRow;
+            }
+
+            throw new Exception(
+                $"Could not find a row which meets the condition: column named {columnName} == {value}");
+        }
+
+        /// <summary>
         /// A method which returns the object from a given column and row.
         /// </summary>
         /// <param name="columnName">A string containing the name of the column.</param>
         /// <param name="row">A zero based row index, defaults to 0 which is the first row.</param>
         /// <returns>The ColumnValue object, which may be null.</returns>
         /// <exception cref="Exception"></exception>
-        public object? ValueAt(string columnName, int row = 1)
+        public object? ValueAt(string columnName, int row = 0)
         {
             var columnIndex = Columns.IndexOf(columnName);
 
@@ -57,6 +90,34 @@ namespace CSharpSqlTests
                 throw new Exception($"could not find a Column named {columnName}");
 
             return Rows[row].ColumnValues[columnIndex];
+        }
+
+        /// <summary>
+        /// A method which returns a DatTable populated with columns and rows from the supplied TabularData, useful for passing TableValued arguments into stored procedures etc.
+        /// </summary>
+        public DataTable ToDataTable()
+        {
+            var dataTable = new DataTable();
+
+            foreach (var column in Columns)
+            {
+                dataTable.Columns.Add(column);
+            }
+
+            foreach (var tabularDataRow in Rows)
+            {
+                var values = new List<object?>();
+
+                foreach (var column in Columns)
+                {
+                    var columnIndex = IndexOfColumnNamed(column);
+                    values.Add(tabularDataRow.ColumnValues[columnIndex]);
+                }
+
+                dataTable.Rows.Add(values.ToArray());
+            }
+
+            return dataTable;
         }
 
         /// <summary>
@@ -95,7 +156,7 @@ namespace CSharpSqlTests
             
             foreach (var tableDataRow in trimmedLines.Skip(2))
             {
-                var row = new TabularDataRow();
+                var row = new TabularDataRow(tableDefinition);
                 foreach (var columnValue in tableDataRow.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries).ToList())
                 {                    
                     row.ColumnValues.Add(markdownStringValuesToSqlObjectValue(columnValue.Trim()));
@@ -201,19 +262,19 @@ namespace CSharpSqlTests
         /// </summary>
         public static TabularData FromSqlDataReader(IDataReader dataReader)
         {
-            var tableData = new TabularData();
+            var tableDefinition = new TabularData();
 
             var columnSchemaGen = (IDbColumnSchemaGenerator)dataReader;
             var columns = columnSchemaGen.GetColumnSchema();
             
             foreach (var dbColumn in columns)
             {
-                tableData.Columns.Add(dbColumn.ColumnName.Trim());
+                tableDefinition.Columns.Add(dbColumn.ColumnName.Trim());
             }
 
             while (dataReader.Read())
             {
-                var row = new TabularDataRow();
+                var row = new TabularDataRow(tableDefinition);
                 foreach (var dbColumn in columns)
                 {
                     if (dbColumn.DataTypeName == "money")
@@ -224,12 +285,12 @@ namespace CSharpSqlTests
                         row.ColumnValues.Add(DBNull.Value == value ? null : value);
                     }
                 }
-                tableData.Rows.Add(row);
+                tableDefinition.Rows.Add(row);
             }
 
             dataReader.Close();
 
-            return tableData;
+            return tableDefinition;
         }
 
         /// <summary>
@@ -289,7 +350,6 @@ namespace CSharpSqlTests
             differences = diffs;
             return isEqualTo;
         }
-
 
         /// <summary>
         /// Return true if this TabularData contains at least the columns and rows in the supplied comparisonData, also return a list of any missing data
@@ -381,7 +441,7 @@ namespace CSharpSqlTests
             if (columnValues.Length != Columns.Count)
                 throw new Exception($"Incorrect number of column values supplied, should be {Columns.Count}");
 
-            var newRow = new TabularDataRow();
+            var newRow = new TabularDataRow(this);
             foreach (var columnValue in columnValues)
             {
                 // todo handle nulls?

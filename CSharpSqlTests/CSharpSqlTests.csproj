@@ -23,6 +23,7 @@
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	<IncludeSymbols>true</IncludeSymbols>
 	<EmbedAllSources>true</EmbedAllSources>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	  
   </PropertyGroup>
 

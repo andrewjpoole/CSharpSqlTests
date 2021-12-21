@@ -13,7 +13,7 @@ namespace CSharpSqlTests
             Context = context;
         }
 
-        public static Given UsingThe(LocalDbTestContext context) => new(context);
+        public static Given UsingThe(ILocalDbTestContext context) => new(context);
 
         public Given And => this;
         

@@ -20,6 +20,30 @@ namespace CSharpSqlTests
         public Then And => this;
 
         /// <summary>
+        /// A method which returns the context's LastQueryResult as a TabularData for assertions etc, provided that a Reader query has previously populated it.
+        /// </summary>
+        /// <param name="results">A TabularData containing the context's LastQueryResult provided that a Reader query has previously populated it.</param>
+        /// <exception cref="Exception">Exceptions are thrown if the LastQueryResult is null or does not contain a DataReader</exception>
+        public Then FetchingTheReaderQueryResults(out TabularData results)
+        {
+            if (Context.LastQueryResult is null)
+                throw new Exception("context.LastQueryResult is null");
+
+            var dataReader = (IDataReader)Context.LastQueryResult;
+
+            if (dataReader is null)
+                throw new Exception("context.LastQueryResult does not contain a IDataReader object");
+
+            var tableDataResult = TabularData.FromSqlDataReader(dataReader);
+
+            dataReader.Close();
+
+            results = tableDataResult;
+
+            return this;
+        }
+
+        /// <summary>
         /// A method which asserts that the context's LastQueryResult property is equal to a supplied object.
         /// </summary>
         /// <param name="expected">An object containing the value to assert</param>

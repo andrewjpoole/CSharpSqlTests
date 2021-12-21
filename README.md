@@ -13,7 +13,7 @@ Test data can be expressed as markdown/specflow tables in the tests, which are e
 
 Hopefully the following examples speak for themselves!
 
-```CSharp
+```cSharp
 public class SampleDatabaseTestsUsingASingleContext : IClassFixture<LocalDbContextFixture>
 {
     private readonly ITestOutputHelper _testOutputHelper;
