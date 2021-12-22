@@ -46,6 +46,25 @@ namespace CSharpSqlTests
         /// </summary>
         IDbTransaction? SqlTransaction { get; }
         /// <summary>
+        /// The Isolation level used when creating SqlTransactions for individual tests.
+        /// Defaults to IsolationLevel.ReadUncommitted, which enables you to connect to the temporary localDb instance using SSMS etc
+        /// and query data while debugging a test, however you must also specify the isolation level in SSMS SqlServer defaults to ReadCommitted
+        /// <example>
+        ///<code>
+        ///SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+        ///BEGIN TRAN;
+        ///
+        /// -- run queries here...
+        ///SELECT[Id]
+        ///,[Name]
+        ///,[Address]
+        ///FROM[dbo].[Customers]
+        /// </code>
+        /// </example>
+        /// Be sure to commit or rollback any transactions and disconnect from the temporary localDb instance, otherwise the test will not be able to clean after itself.
+        /// </summary>
+        IsolationLevel TransactionIsolationLevel { get; set; }
+        /// <summary>
         /// This object will contain the result of Queries made against the connection, 
         /// for ExecuteReader() queries it will contain an IDataReader, 
         /// for ExecuteNonQuery() queries it will contain the number of rows affected,
@@ -71,13 +90,22 @@ namespace CSharpSqlTests
 
         private string _instancePath =>
             $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Microsoft\\Microsoft SQL Server Local DB\\Instances\\{_instanceName}";
-        
+
+        /// <inheritdoc />
         public IDbConnection SqlConnection { get; private set; }
+
+        /// <inheritdoc />
         public IDbTransaction? SqlTransaction { get; private set; }
+        
+        /// <inheritdoc />
+        public IsolationLevel TransactionIsolationLevel { get; set; } = IsolationLevel.ReadUncommitted;
+
+        /// <inheritdoc />
         public object? LastQueryResult { get; set; }
 
+        /// <inheritdoc />
         public Dictionary<string, object?> State { get; set; } = new();
-
+        
         public LocalDbTestContext(string databaseName, Action<string>? logTiming = null)
         {
             _databaseName = databaseName;
@@ -120,7 +148,7 @@ namespace CSharpSqlTests
         {
             try
             {
-                SqlTransaction = SqlConnection.BeginTransaction();
+                SqlTransaction = SqlConnection.BeginTransaction(TransactionIsolationLevel);
                 useConnection(SqlConnection, SqlTransaction);
             }            
             finally 
