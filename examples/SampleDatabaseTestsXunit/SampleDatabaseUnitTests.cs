@@ -4,7 +4,7 @@ using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SampleDatabaseTests
+namespace SampleDatabaseTestsXunit
 {
     public class SampleDatabaseUnitTests
     {

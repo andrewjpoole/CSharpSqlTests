@@ -1,8 +1,10 @@
+using CSharpSqlTests.NUnit;
+using Moq;
 using NUnit.Framework;
 
 namespace CSharpSqlTests.NUit.Tests
 {
-    public class Tests
+    public class ThenTests
     {
         [SetUp]
         public void Setup()
@@ -12,7 +14,13 @@ namespace CSharpSqlTests.NUit.Tests
         [Test]
         public void Test1()
         {
-            Assert.Pass();
+            var mockContext = new Mock<ILocalDbTestContext>();
+
+            mockContext.Setup(x => x.LastQueryResult).Returns(23);
+
+            var sut = new Then(mockContext.Object);
+
+            sut.TheNonReaderQueryResultShouldBe(23);
         }
     }
 }

@@ -1,10 +1,11 @@
 using System.Linq;
 using CSharpSqlTests;
+using CSharpSqlTests.xUnit;
 using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SampleDatabaseTests
+namespace SampleDatabaseTestsXunit
 {
     public class SampleDatabaseTestsUsingASingleContext : IClassFixture<LocalDbContextFixture>
     {

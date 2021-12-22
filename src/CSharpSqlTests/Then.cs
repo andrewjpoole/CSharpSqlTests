@@ -1,7 +1,5 @@
-﻿using FluentAssertions;
-using System;
+﻿using System;
 using System.Data;
-using Xunit;
 // ReSharper disable UnusedMember.Local
 
 namespace CSharpSqlTests
@@ -43,15 +41,7 @@ namespace CSharpSqlTests
             return this;
         }
 
-        /// <summary>
-        /// A method which asserts that the context's LastQueryResult property is equal to a supplied object.
-        /// </summary>
-        /// <param name="expected">An object containing the value to assert</param>
-        public Then TheNonReaderQueryResultShouldBe(object expected)
-        {
-            Assert.True(Context.LastQueryResult?.Equals(expected));
-            return this;
-        }
+        
 
         /// <summary>
         /// A method which asserts that the context's LastQueryResult property should contain certain tabular data.
@@ -188,19 +178,7 @@ namespace CSharpSqlTests
             return this;
         }
 
-        /// <summary>
-        /// A method which executes a Sql scalar query and evaluates an assertion using the supplied Func.
-        /// </summary>
-        /// <param name="cmdText">A string containing the Sql query</param>
-        /// <param name="assertionUsingQueryResult">A Func which is passed the query result and should return a bool, false if the test should fail.</param>
-        public Then TheScalarQueryIsExecuted(string cmdText, Func<object?, bool> assertionUsingQueryResult)
-        {
-            TheScalarQueryIsExecuted(cmdText, out var returnValue);
-
-            Assert.True(assertionUsingQueryResult(returnValue), "Func assertionUsingQueryResult did not evaluate to true");
-
-            return this;
-        }
+        
 
         /// <summary>
         /// A method which executes a Sql reader query and returns the resulting TabularData to be asserted against.
@@ -221,19 +199,7 @@ namespace CSharpSqlTests
             return this;
         }
         
-        /// <summary>
-        /// A method which executes a Sql reader query and evaluates an assertion using the supplied Func.
-        /// </summary>
-        /// <param name="cmdText">A string containing the Sql query</param>
-        /// <param name="assertionUsingQueryResult"></param>
-        public Then TheReaderQueryIsExecuted(string cmdText, Func<TabularData, bool> assertionUsingQueryResult)
-        {
-            TheReaderQueryIsExecuted(cmdText, out var returnValue);
-            
-            Assert.True(assertionUsingQueryResult(returnValue), "Func assertionUsingQueryResult did not evaluate to true");
-
-            return this;
-        }
+        
 
         /// <summary>
         /// A method which executes a reader query and asserts that result should be equal to the supplied tabular data.

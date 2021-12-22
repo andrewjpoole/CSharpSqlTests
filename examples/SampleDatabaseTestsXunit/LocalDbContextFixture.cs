@@ -3,7 +3,7 @@ using CSharpSqlTests;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace SampleDatabaseTests
+namespace SampleDatabaseTestsXunit
 {
     public class LocalDbContextFixture : IDisposable
     {
