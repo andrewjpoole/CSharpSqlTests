@@ -34,7 +34,7 @@ namespace CSharpSqlTests.FrameworkTests
         {
             var currentDirectory = new DirectoryInfo(Assembly.GetExecutingAssembly().Location);
             var solutionDir = currentDirectory.Parent?.Parent?.Parent?.Parent?.Parent;
-            var dacPacs = solutionDir!.EnumerateFiles("SampleDb.dacpac", SearchOption.AllDirectories).ToList();
+            var dacPacs = solutionDir!.EnumerateFiles("..\\examples\\SampleDb.dacpac", SearchOption.AllDirectories).ToList();
 
             var sut = new DacPacInfo(dacPacs.First().FullName);
 

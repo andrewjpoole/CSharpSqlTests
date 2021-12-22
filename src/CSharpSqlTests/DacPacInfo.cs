@@ -34,7 +34,7 @@ namespace CSharpSqlTests
 
             // first traverse up to hopefully the solution directory
             var directoryInfo = currentDirectory;
-            for (var x = 0; x < 5; x++)
+            for (var x = 0; x < 6; x++)
             {
                 if(directoryInfo.Parent is not null)
                     directoryInfo = directoryInfo.Parent;

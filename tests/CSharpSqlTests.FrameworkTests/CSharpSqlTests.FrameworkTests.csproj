@@ -23,9 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CSharpSqlTests\CSharpSqlTests.csproj" />
+    <ProjectReference Include="..\..\src\CSharpSqlTests\CSharpSqlTests.csproj" />
   </ItemGroup>
-
-  
 
 </Project>
