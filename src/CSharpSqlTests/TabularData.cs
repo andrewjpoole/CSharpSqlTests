@@ -10,13 +10,23 @@ namespace CSharpSqlTests
 {
     public class TabularData
     {
+        /// <summary>
+        /// A list of column names
+        /// </summary>
         public List<string> Columns = new();
+        
+        /// <summary>
+        /// A list of TabularDataRows
+        /// </summary>
         public List<TabularDataRow> Rows = new();
 
         private static Func<string, object?> markdownStringValuesToSqlObjectValue = value =>
         {
             if (DateTime.TryParse(value, out var valueAsDate))
                 return valueAsDate;
+
+            if (Guid.TryParse(value, out var valueAsGuid))
+                return valueAsGuid;
 
             if (int.TryParse(value, out var valueAsInt))
                 return valueAsInt;

@@ -166,8 +166,7 @@ namespace CSharpSqlTests.FrameworkTests
                     mockedReader.Setup(x => x[columnName]).Returns(tabularDataRow.ColumnValues[columnName]);
                 }
             }
-
-            //mockCmd.Setup(x => x.ExecuteReader()).Returns(mockedReader.Object);
+            
             return mockedReader;
         }
 

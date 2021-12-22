@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using CSharpSqlTests;
 using CSharpSqlTests.xUnit;
@@ -260,6 +261,58 @@ namespace SampleDatabaseTestsXunit
 
                 Then.UsingThe(_context)
                     .TheReaderQueryIsExecutedAndContains("SELECT * FROM Customers", TabularData.CreateWithColumns("Id", "Name").AddRowWithValues(2, "Jo").ToMarkdownTableString());
+
+            });
+        }
+
+        [Fact]
+        public void contains_works_with_Guids()
+        {
+            _context.RunTest((connection, transaction) =>
+            {
+                var id1 = Guid.NewGuid();
+                var id2 = Guid.NewGuid();
+
+                var tempData = TabularData
+                    .CreateWithColumns("Id", "Name", "Address")
+                    .AddRowWithValues(id1, "Andrew", "emptyString")
+                    .AddRowWithValues(id2, "Jo", "null");
+
+                Given.UsingThe(_context)
+                    .And.TheFollowingDataExistsInTheTable("Accounts", tempData);
+
+                When.UsingThe(_context)
+                    .TheReaderQueryIsExecuted("SELECT * FROM Accounts");
+
+                Then.UsingThe(_context)
+                    .TheReaderQueryResultsShouldContain(TabularData.CreateWithColumns("Id").AddRowWithValues(id1));
+
+            });
+        }
+
+        [Fact]
+        public void contains_works_with_Guids_parsed_from_strings()
+        {
+            _context.RunTest((connection, transaction) =>
+            {
+                var id1 = Guid.NewGuid();
+                var id2 = Guid.NewGuid();
+
+                var tempData = TabularData
+                    .CreateWithColumns("Id", "Name", "Address")
+                    .AddRowWithValues(id1, "Andrew", "emptyString")
+                    .AddRowWithValues(id2, "Jo", "null");
+
+                Given.UsingThe(_context)
+                    .And.TheFollowingDataExistsInTheTable("Accounts", tempData);
+
+                When.UsingThe(_context)
+                    .TheReaderQueryIsExecuted("SELECT * FROM Accounts");
+
+                Then.UsingThe(_context)
+                    .TheReaderQueryResultsShouldContain(@$"| Id    | Name   |
+                                                           | ----- | ------ |
+                                                           | {id1} | Andrew |"); // the guid ends up as a string in the TabularData rather than a Guid type
 
             });
         }

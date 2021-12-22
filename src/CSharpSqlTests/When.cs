@@ -115,7 +115,7 @@ namespace CSharpSqlTests
         }
 
         /// <summary>
-        /// A method which executes a Sql scalar query and returns the result as an object.
+        /// A method which executes a Sql scalar query and stores the result on the context's LastQueryResult property as an object.
         /// </summary>
         /// <param name="cmdText">The Sql query to execute</param>
         /// <param name="returnValue">The return value as an object</param>
@@ -128,7 +128,7 @@ namespace CSharpSqlTests
         }
 
         /// <summary>
-        /// A method which executes a Sql scalar query and returns the the result on the context's LastQueryResult property.
+        /// A method which executes a Sql scalar query and stores the result on the context's LastQueryResult property as an object.
         /// </summary>
         /// <param name="cmdText">The Sql query to execute</param>
         public When TheScalarQueryIsExecuted(string cmdText)
@@ -144,7 +144,7 @@ namespace CSharpSqlTests
         }
 
         /// <summary>
-        /// A method which executes a Sql reader query and returns the result as an IDataReader.
+        /// A method which executes a Sql reader query and stores the result on the context's LastQueryResult property as an IDataReader.
         /// </summary>
         /// <param name="cmdText">The Sql query to execute</param>
         /// <param name="returnValue">The return value as an IDataReader</param>
@@ -157,7 +157,7 @@ namespace CSharpSqlTests
         }
 
         /// <summary>
-        /// A method which executes a Sql reader query and returns the result as an IDataReader.
+        /// A method which executes a Sql reader query and stores the result on the context's LastQueryResult property as an IDataReader.
         /// </summary>
         /// <param name="cmdText">The Sql query to execute</param>
         public When TheReaderQueryIsExecuted(string cmdText)

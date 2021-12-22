@@ -1,3 +1,5 @@
+using System;
+using System.Text;
 using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
@@ -207,5 +209,52 @@ VALUES
             result.Should().BeFalse();
             differences.Should().Contain(difference => difference == "TabularData does not contain a column named frogs");
         }
+
+        [Fact]
+        public void TabularData_roundtrips_guids_from_markdown_table_string()
+        {
+            var id = Guid.NewGuid();
+
+            var sb = new StringBuilder();
+            sb.AppendLine("| Id | Name |");
+            sb.AppendLine("| --- | --- |");
+            sb.AppendLine($"| {id} | Andrew |");
+
+            var tabularData = TabularData.FromMarkdownTableString(sb.ToString());
+
+            tabularData.ValueAt("Id", row: 0).Should().Be(id);
+
+            var roundTrippedString = tabularData.ToMarkdownTableString();
+
+            roundTrippedString.Should().Be(sb.ToString().Trim());
+
+        }
+
+        [Fact]
+        public void TabularData_ToSqlString_correctly_handles_guids()
+        {
+            var id1 = Guid.NewGuid();
+            var id2 = Guid.NewGuid();
+
+            var tabularData = TabularData.CreateWithColumns("Id", "Name")
+                .AddRowWithValues(id1, "Andrew")
+                .AddRowWithValues(id2, "James");
+
+            var sqlInsert = tabularData.ToSqlString("Test");
+
+            sqlInsert.Should().Be(@$"INSERT INTO Test
+(Id,Name)
+VALUES
+('{id1}','Andrew')
+,('{id2}','James')
+");
+        }
+
+        // Add tests for:
+        // FromDataReader
+        // ToDataTable
+        // IndexOfColumnNamed
+        // RowWhere
+        // 
     }
 }

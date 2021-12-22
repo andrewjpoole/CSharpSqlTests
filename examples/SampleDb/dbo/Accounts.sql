@@ -1,0 +1,6 @@
+﻿CREATE TABLE [dbo].[Accounts]
+(
+	[Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY, 
+    [Name] NVARCHAR(50) NULL, 
+    [Address] NVARCHAR(500) NULL
+)

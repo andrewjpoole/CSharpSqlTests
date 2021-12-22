@@ -66,6 +66,7 @@
     <Build Include="dbo\Orders.sql" />
     <Build Include="dbo\spAddTwoNumbers.sql" />
     <Build Include="dbo\spFetchOrderById.sql" />
+    <Build Include="dbo\Accounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SampleDb.publish.xml" />
