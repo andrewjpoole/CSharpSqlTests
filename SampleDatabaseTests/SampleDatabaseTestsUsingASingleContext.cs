@@ -214,7 +214,7 @@ namespace SampleDatabaseTests
                     .TheReaderQueryIsExecuted("SELECT * FROM Customers", out var result);
 
                 result.Rows.Count.Should().Be(1);
-                result.Rows.First().ColumnValues.First().Should().Be(2);
+                result.Rows.First().ColumnValues["Id"].Should().Be(2);
 
             });
         }

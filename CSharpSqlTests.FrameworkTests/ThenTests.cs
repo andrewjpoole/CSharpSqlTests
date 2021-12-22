@@ -175,8 +175,7 @@ namespace CSharpSqlTests.FrameworkTests
             {
                 foreach (var columnName in dataToReturn.Columns)
                 {
-                    var columnIndex = dataToReturn.Columns.IndexOf(columnName);
-                    mockedReader.Setup(x => x[columnName]).Returns(tabularDataRow.ColumnValues[columnIndex]);
+                    mockedReader.Setup(x => x[columnName]).Returns(tabularDataRow.ColumnValues[columnName]);
                 }
             }
 

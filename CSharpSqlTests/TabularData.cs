@@ -63,11 +63,9 @@ namespace CSharpSqlTests
         /// <exception cref="Exception">Thrown if no rows can be found which match the condition.</exception>
         public TabularDataRow RowWhere(string columnName, object value)
         {
-            var columnIndex = IndexOfColumnNamed(columnName);
-            
             foreach (var tabularDataRow in Rows)
             {
-                if (tabularDataRow.ColumnValues[columnIndex].Equals(value))
+                if (tabularDataRow.ColumnValues[columnName]!.Equals(value))
                     return tabularDataRow;
             }
 
@@ -84,12 +82,7 @@ namespace CSharpSqlTests
         /// <exception cref="Exception"></exception>
         public object? ValueAt(string columnName, int row = 0)
         {
-            var columnIndex = Columns.IndexOf(columnName);
-
-            if (columnIndex == -1)
-                throw new Exception($"could not find a Column named {columnName}");
-
-            return Rows[row].ColumnValues[columnIndex];
+            return Rows[row].ColumnValues[columnName];
         }
 
         /// <summary>
@@ -108,10 +101,9 @@ namespace CSharpSqlTests
             {
                 var values = new List<object?>();
 
-                foreach (var column in Columns)
+                foreach (var columnName in Columns)
                 {
-                    var columnIndex = IndexOfColumnNamed(column);
-                    values.Add(tabularDataRow.ColumnValues[columnIndex]);
+                    values.Add(tabularDataRow.ColumnValues[columnName]);
                 }
 
                 dataTable.Rows.Add(values.ToArray());
@@ -149,17 +141,24 @@ namespace CSharpSqlTests
             // first, foreach row, remove any instances of 1 or more spaces before a pipe, this allows the tables to be indented inline with the code
             var trimmedLines = rawLines.Select(tableDataLine => Regex.Replace(tableDataLine, "[ ]{1,}\\|", "|")).ToList();
 
-            foreach (var column in trimmedLines[0].Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries).ToList())
+            var columnNames = trimmedLines[0].Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList();
+
+            foreach (var column in columnNames)
             {
-                tableDefinition.Columns.Add(column.Trim());
+                tableDefinition.Columns.Add(column);
             }
             
             foreach (var tableDataRow in trimmedLines.Skip(2))
             {
+                var columnValues = tableDataRow.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList();
+
+                if (columnValues.Count != columnNames.Count)
+                    throw new Exception($"All of the rows must have the same number of columns as the header");
+
                 var row = new TabularDataRow(tableDefinition);
-                foreach (var columnValue in tableDataRow.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries).ToList())
-                {                    
-                    row.ColumnValues.Add(markdownStringValuesToSqlObjectValue(columnValue.Trim()));
+                for (var rowIndex = 0; rowIndex < columnValues.Count; rowIndex++)
+                {
+                    row.ColumnValues.Add(columnNames[rowIndex], markdownStringValuesToSqlObjectValue(columnValues[rowIndex]));
                 }
                 tableDefinition.Rows.Add(row);
             }
@@ -201,7 +200,7 @@ namespace CSharpSqlTests
                     firstRow = false;
 
                 firstInLoop = true;
-                foreach (var columnValue in row.ColumnValues)
+                foreach (var columnValue in row.ColumnValues.Values)
                 {
                     var comma = firstInLoop ? "" : ",";
 
@@ -248,7 +247,7 @@ namespace CSharpSqlTests
             foreach(var row in Rows)
             {
                 sbRows.Append($"{Environment.NewLine}|");
-                foreach (var columnValue in row.ColumnValues)
+                foreach (var columnValue in row.ColumnValues.Values)
                 {
                     sbRows.Append($" {columnValue} |");
                 }
@@ -278,11 +277,11 @@ namespace CSharpSqlTests
                 foreach (var dbColumn in columns)
                 {
                     if (dbColumn.DataTypeName == "money")
-                        row.ColumnValues.Add($"{((decimal)dataReader[dbColumn.ColumnName]):C}");
+                        row.ColumnValues.Add(dbColumn.ColumnName, $"{((decimal)dataReader[dbColumn.ColumnName]):C}");
                     else
                     {
                         var value = dataReader[dbColumn.ColumnName];
-                        row.ColumnValues.Add(DBNull.Value == value ? null : value);
+                        row.ColumnValues.Add(dbColumn.ColumnName, DBNull.Value == value ? null : value);
                     }
                 }
                 tableDefinition.Rows.Add(row);
@@ -304,7 +303,7 @@ namespace CSharpSqlTests
             if (Columns.Count != comparisonData.Columns.Count) 
                 differences.Add($"The number of columns is different: {Columns.Count} vs {comparisonData.Columns.Count}");
 
-            for (int colIndex = 0; colIndex < Columns.Count; colIndex++)
+            for (var colIndex = 0; colIndex < Columns.Count; colIndex++)
             {
                 var thisColumn = Columns[colIndex].Trim();
                 var comparisonColumn = comparisonData.Columns[colIndex].Trim();
@@ -316,7 +315,7 @@ namespace CSharpSqlTests
             if (Rows.Count != comparisonData.Rows.Count)
                 differences.Add($"The number of rows is different: {Rows.Count} vs {comparisonData.Rows.Count}");
 
-            for (int rowIndex = 0; rowIndex < Rows.Count; rowIndex++)
+            for (var rowIndex = 0; rowIndex < Rows.Count; rowIndex++)
             {
                 var thisRow = Rows[rowIndex];
                 var comparisonDataRow = comparisonData.Rows[rowIndex];
@@ -326,8 +325,10 @@ namespace CSharpSqlTests
                 
                 for (var colValueIndex = 0; colValueIndex < thisRow.ColumnValues.Count; colValueIndex++)
                 {
-                    var thisColValue = thisRow.ColumnValues[colValueIndex];
-                    var comparisonColValue = comparisonDataRow.ColumnValues[colValueIndex];
+                    var columnName = Columns[colValueIndex];
+
+                    var thisColValue = thisRow.ColumnValues[columnName];
+                    var comparisonColValue = comparisonDataRow.ColumnValues[columnName];
 
                     if (thisColValue is null && comparisonColValue is null)
                         continue;
@@ -381,21 +382,19 @@ namespace CSharpSqlTests
                 foreach (var tabularDataRow in Rows)
                 {
                     // Now loop through the columns, checking if we have a matching comparisonData
-                    for (var colIndex = 0; colIndex < comparisonData.Columns.Count; colIndex++)
+                    for (var columnIndex = 0; columnIndex < comparisonData.Columns.Count; columnIndex++)
                     {
-                        var colName = comparisonData.Columns[colIndex];
-                        var tabularDataColumnIndex = Columns.IndexOf(colName);
+                        var columnName = comparisonData.Columns[columnIndex];
                         
                         // Compare this column comparisonData (select based on columnName) to the supplied comparisonData
-                        if (tabularDataRow.ColumnValues[tabularDataColumnIndex]!.Equals(comparisonDataRow.ColumnValues[colIndex]))
+                        if (comparisonDataRow.ColumnValues.ContainsKey(columnName) 
+                            && tabularDataRow.ColumnValues[columnName]!.Equals(comparisonDataRow.ColumnValues[columnName]))
                             columnComparisonsSatisfied += 1;
-                        
                     }
 
                     // If we have incremented columnComparisonsSatisfied to match the count of the columns in comparisonData then we have satisfied the row
                     if (columnComparisonsSatisfied == comparisonData.Columns.Count)
                         comparisonDataRowIsSatisfied = true;
-                    
                 }
 
                 if (!comparisonDataRowIsSatisfied)
@@ -442,12 +441,14 @@ namespace CSharpSqlTests
                 throw new Exception($"Incorrect number of column values supplied, should be {Columns.Count}");
 
             var newRow = new TabularDataRow(this);
-            foreach (var columnValue in columnValues)
+            for (var index = 0; index < columnValues.Length; index++)
             {
-                // todo handle nulls?
-
-                newRow.ColumnValues.Add(columnValue);
+                var columnName = Columns[index];
+                var columnValue = columnValues[index];
+                
+                newRow.ColumnValues.Add(columnName, columnValue);
             }
+
             Rows.Add(newRow);
 
             return this;

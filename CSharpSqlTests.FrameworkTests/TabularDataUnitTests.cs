@@ -29,12 +29,12 @@ namespace CSharpSqlTests.FrameworkTests
             tabularData.Columns[0].Should().Be("column1");
             tabularData.Columns[1].Should().Be("column2");
             tabularData.Rows.Count.Should().Be(3);
-            tabularData.Rows[0].ColumnValues[0].Should().Be("valueA");
-            tabularData.Rows[0].ColumnValues[1].Should().Be("valueB");
-            tabularData.Rows[1].ColumnValues[0].Should().Be("valueC");
-            tabularData.Rows[1].ColumnValues[1].Should().Be("valueD");
-            tabularData.Rows[2].ColumnValues[0].Should().Be(string.Empty);
-            tabularData.Rows[2].ColumnValues[1].Should().Be(null);
+            tabularData.Rows[0].ColumnValues["column1"].Should().Be("valueA");
+            tabularData.Rows[0].ColumnValues["column2"].Should().Be("valueB");
+            tabularData.Rows[1].ColumnValues["column1"].Should().Be("valueC");
+            tabularData.Rows[1].ColumnValues["column2"].Should().Be("valueD");
+            tabularData.Rows[2].ColumnValues["column1"].Should().Be(string.Empty);
+            tabularData.Rows[2].ColumnValues["column2"].Should().Be(null);
         }
 
         [Fact]
@@ -52,10 +52,10 @@ namespace CSharpSqlTests.FrameworkTests
             tabularData.Columns[0].Should().Be("column1");
             tabularData.Columns[1].Should().Be("column2");
             tabularData.Rows.Count.Should().Be(2);
-            tabularData.Rows[0].ColumnValues[0].Should().Be("valueA");
-            tabularData.Rows[0].ColumnValues[1].Should().Be("valueB");
-            tabularData.Rows[1].ColumnValues[0].Should().Be("valueC");
-            tabularData.Rows[1].ColumnValues[1].Should().Be("valueD");
+            tabularData.Rows[0].ColumnValues["column1"].Should().Be("valueA");
+            tabularData.Rows[0].ColumnValues["column2"].Should().Be("valueB");
+            tabularData.Rows[1].ColumnValues["column1"].Should().Be("valueC");
+            tabularData.Rows[1].ColumnValues["column2"].Should().Be("valueD");
         }
 
         [Fact]
@@ -83,8 +83,8 @@ namespace CSharpSqlTests.FrameworkTests
             var testString = @"
 | column1 | column2 |
 | ------- | ------- |
-| valueA  | 12  |
-| valueC  | 13  |";
+| valueA  | 12      |
+| valueC  | 13      |";
 
             var tabularData = TabularData.FromMarkdownTableString(testString);
 
@@ -111,10 +111,10 @@ VALUES
             tabularData.Columns[0].Should().Be("column1");
             tabularData.Columns[1].Should().Be("column2");
             tabularData.Rows.Count.Should().Be(2);
-            tabularData.Rows[0].ColumnValues[0].Should().Be("valueA");
-            tabularData.Rows[0].ColumnValues[1].Should().Be("valueB");
-            tabularData.Rows[1].ColumnValues[0].Should().Be("valueC");
-            tabularData.Rows[1].ColumnValues[1].Should().Be("valueD");
+            tabularData.Rows[0].ColumnValues["column1"].Should().Be("valueA");
+            tabularData.Rows[0].ColumnValues["column2"].Should().Be("valueB");
+            tabularData.Rows[1].ColumnValues["column1"].Should().Be("valueC");
+            tabularData.Rows[1].ColumnValues["column2"].Should().Be("valueD");
         }
 
         [Fact]
@@ -182,7 +182,7 @@ VALUES
             var result = tabularData.Contains(subsetOfTabularData, out var differences);
 
             result.Should().BeFalse();
-            differences.Should().Contain(difference => difference == "TabularData does not contain a row that contains the values 31/10/2021 00:00:00,30");
+            differences.Should().Contain(difference => difference == "TabularData does not contain a row that contains the values [created, 31/10/2021 00:00:00],[id, 30]");
         }
 
         [Fact]

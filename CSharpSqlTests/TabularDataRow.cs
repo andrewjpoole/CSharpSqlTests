@@ -6,9 +6,8 @@ namespace CSharpSqlTests
     public class TabularDataRow
     {
         public TabularData Parent { get; }
-
-        public List<object?> ColumnValues = new();
-        //public Dictionary<string, object?> ColumnValues = new();
+        
+        public Dictionary<string, object?> ColumnValues = new();
 
         public TabularDataRow(TabularData parent)
         {
@@ -22,8 +21,7 @@ namespace CSharpSqlTests
         /// <param name="expected">An object contain the expected value to assert.</param>
         public void AssertHasValue(string columnName, object? expected)
         {
-            var columnIndex = Parent.IndexOfColumnNamed(columnName);
-            var actual = ColumnValues[columnIndex];
+            var actual = ColumnValues[columnName];
             Assert.True(actual.Equals(expected), $"The actual ({actual}) was not equal to the expected ({expected})");
         }
     }
