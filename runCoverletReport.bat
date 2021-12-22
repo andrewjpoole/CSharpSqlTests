@@ -1,4 +1,4 @@
-del "./coverageReport/*.*?"
+rd /s /q "./coverageReport/"
 
 dotnet test CSharpSqlTests.sln --collect:"XPlat Code Coverage"
 

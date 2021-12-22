@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\CSharpSqlTests.NUnit\CSharpSqlTests.NUnit.csproj" />
+    <ProjectReference Include="..\..\src\CSharpSqlTests.NUnit\CSharpSqlTests.NUnit.csproj" />
   </ItemGroup>
 
 </Project>
