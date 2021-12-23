@@ -22,13 +22,17 @@ steps:
     restoreSolution: '$(solution)'
 
 - task: VSBuild@1
+  displayName: 'Building Solution'
   inputs:
     solution: '$(solution)'
     vsVersion: '17.0'
     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-
+    maximumCpuCount: true
+    createLogFile: true
+    logFileVerbosity: 'detailed'
+    
 - task: VSTest@2
   inputs:
     platform: '$(buildPlatform)'
