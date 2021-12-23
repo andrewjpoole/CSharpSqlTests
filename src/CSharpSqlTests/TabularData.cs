@@ -113,7 +113,8 @@ namespace CSharpSqlTests
 
                 foreach (var columnName in Columns)
                 {
-                    values.Add(tabularDataRow.ColumnValues[columnName]);
+                    var columnValue = tabularDataRow.ColumnValues[columnName];
+                    values.Add(columnValue);
                 }
 
                 dataTable.Rows.Add(values.ToArray());

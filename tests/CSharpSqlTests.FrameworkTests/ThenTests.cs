@@ -154,20 +154,37 @@ namespace CSharpSqlTests.FrameworkTests
             mockedReaderColumnSchemaGen.Setup(x => x.GetColumnSchema()).Returns(
                 new ReadOnlyCollection<DbColumn>(columns));
 
-            var readToggle = true;
+            var row = -1;
             mockedReader.Setup(x => x.Read())
-                .Returns(() => readToggle)
-                .Callback(() => readToggle = false);
+                .Returns(() => row < dataToReturn.Rows.Count -1)
+                .Callback(() => row++);
             
-            foreach (var tabularDataRow in dataToReturn.Rows)
-            {
-                foreach (var columnName in dataToReturn.Columns)
-                {
-                    mockedReader.Setup(x => x[columnName]).Returns(tabularDataRow.ColumnValues[columnName]);
-                }
-            }
-            
+            mockedReader.Setup(x => x[It.IsAny<string>()]).Returns((string columnName) => dataToReturn.Rows[row].ColumnValues[columnName]);
+
             return mockedReader;
+        }
+
+        [Fact]
+        public void TabularData_FromSqlDataReader_method_should_return_expected_data()
+        {
+            var id1 = Guid.NewGuid();
+            var id2 = Guid.NewGuid();
+
+            var tabularData = TabularData.CreateWithColumns("Id", "Name")
+                .AddRowWithValues(id1, "Andrew")
+                .AddRowWithValues(id2, "James");
+            
+            var results = TabularData.FromSqlDataReader(SetupDataReader(tabularData).Object);
+
+            results.Columns.Count.Should().Be(2);
+            results.Columns[0].Should().Be("Id");
+            results.Columns[1].Should().Be("Name");
+
+            results.Rows.Count.Should().Be(2);
+            results.Rows[0].ColumnValues["Id"].Should().Be(id1);
+            results.Rows[0].ColumnValues["Name"].Should().Be("Andrew");
+            results.Rows[1].ColumnValues["Id"].Should().Be(id2);
+            results.Rows[1].ColumnValues["Name"].Should().Be("James");
         }
 
         [Fact]

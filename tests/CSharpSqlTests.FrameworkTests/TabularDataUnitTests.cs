@@ -249,12 +249,56 @@ VALUES
 ,('{id2}','James')
 ");
         }
+        
+        [Fact]
+        public void TabularData_ToDataTable_produces_expected_datatable()
+        {
+            var id1 = Guid.NewGuid();
+            var id2 = Guid.NewGuid();
 
-        // Add tests for:
-        // FromDataReader
-        // ToDataTable
-        // IndexOfColumnNamed
-        // RowWhere
-        // 
+            var tabularData = TabularData.CreateWithColumns("Id", "Name")
+                .AddRowWithValues(id1, "Andrew")
+                .AddRowWithValues(id2, "James");
+
+            var result = tabularData.ToDataTable();
+
+            result.Columns.Count.Should().Be(2);
+            result.Columns[0].ColumnName.Should().Be("Id");
+            result.Columns[1].ColumnName.Should().Be("Name");
+
+            result.Rows.Count.Should().Be(2);
+            result.Rows[0]["Id"].Should().Be(id1.ToString());
+            result.Rows[0]["Name"].Should().Be("Andrew");
+            result.Rows[1]["Id"].Should().Be(id2.ToString());
+            result.Rows[1]["Name"].Should().Be("James");
+        }
+
+        [Fact]
+        public void TabularData_IndexOfColumnNamed_returns_expected_index()
+        {
+            var tabularData = TabularData.CreateWithColumns("Id", "Name")
+                .AddRowWithValues(Guid.NewGuid(), "Andrew")
+                .AddRowWithValues(Guid.NewGuid(), "James")
+                .AddRowWithValues(Guid.NewGuid(), "Paul");
+
+            var result = tabularData.IndexOfColumnNamed("Name");
+
+            result.Should().Be(1);
+        }
+
+        [Fact]
+        public void TabularData_RowWhere_returns_the_first_row_matching_the_constraint()
+        {
+            var id1 = Guid.NewGuid();
+            var id2 = Guid.NewGuid();
+
+            var tabularData = TabularData.CreateWithColumns("Id", "Name")
+                .AddRowWithValues(id1, "Andrew")
+                .AddRowWithValues(id2, "James");
+
+            var result = tabularData.RowWhere("Id", id2);
+
+            result.ColumnValues["Name"].Should().Be("James");
+        }
     }
 }
