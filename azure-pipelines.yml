@@ -20,8 +20,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
-    projects: '**/*.csproj
-    !**/*.sqlproj'
+    projects: '**/*.csproj'
     includeNuGetOrg: true
 
 - task: VSBuild@1
