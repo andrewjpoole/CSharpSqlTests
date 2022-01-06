@@ -316,5 +316,32 @@ namespace SampleDatabaseTestsXunit
 
             });
         }
+
+        [Fact]
+        public void dates_are_returned_as_expected()
+        {
+            _context.RunTest((connection, transaction) =>
+            {
+                var id1 = Guid.NewGuid();
+                var id2 = Guid.NewGuid();
+
+                var tempData = TabularData
+                    .CreateWithColumns("Id", "Name", "DateJoined")
+                    .AddRowWithValues(id1, "Andrew", DateTime.Today)
+                    .AddRowWithValues(id2, "Jo", DateTime.Today.AddDays(-2));
+
+                Given.UsingThe(_context)
+                    .And.TheFollowingDataExistsInTheTable("Accounts", tempData);
+
+                When.UsingThe(_context)
+                    .TheReaderQueryIsExecuted("SELECT * FROM Accounts");
+
+                Then.UsingThe(_context)
+                    .TheReaderQueryResultsShouldContain(@$"| Id    | DateJoined       |
+                                                           | ----- | ---------------- |
+                                                           | {id1} | {DateTime.Today} |"); // the guid ends up as a string in the TabularData rather than a Guid type
+
+            });
+        }
     }
 }

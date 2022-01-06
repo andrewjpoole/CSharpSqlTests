@@ -11,9 +11,41 @@ Given, When and Then helper classes are supplied:
 
 Test data can be expressed as markdown/specflow tables in the tests, which are easier to read than plain sql strings
 
+## Getting started
+
 Hopefully the following examples speak for themselves!
 
-```cSharp
+```csharp
+// Install either CSharpSqlTests.xUnit or CSharpSqlTests.NUnit nuget packages, depending on your choice of test framework, they both bring in the core package CSharpSqlTests.
+
+// The quickest and easiest way to start writing tests would be something like this which uses the connection directly rather than any test helpers:
+[Fact]
+public void Connection_can_be_used_to_deploy_dacpac_and_run_stored_procedure_from_it()
+{
+    new LocalDbTestContext(DataBaseName, message => _testOutputHelper.WriteLine(message))
+        .DeployDacpac()
+        .RunTest((connection, transaction) =>
+        {
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = "spAddTwoNumbers";
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.AddParameterWithValue("@param1", 2);
+            cmd.AddParameterWithValue("@param2", 3);
+            cmd.Transaction = transaction;
+
+            var returnParameter = cmd.AddReturnParameter("@ReturnVal");
+
+            cmd.ExecuteNonQuery();
+            var result = returnParameter.Value;
+
+            result.Should().NotBeNull();
+            result.Should().Be(5);
+        }).TearDown();
+}
+// but here each test will get its own localDb instance and DacPac deployment etc which can be expensive.
+
+// A better way would be to share a single context accross all tests in a class, use xUnit's `IClassFixture<T>` like this:
 public class SampleDatabaseTestsUsingASingleContext : IClassFixture<LocalDbContextFixture>
 {
     private readonly ITestOutputHelper _testOutputHelper;
@@ -92,33 +124,13 @@ public class LocalDbContextFixture : IDisposable
         Context.TearDown(); // this closes connections and tidies up the temporary localDb instance
     }
 }
-
-// Or to run tests without using the IClassFixture use the following:
-[Fact]
-public void Connection_can_be_used_to_deploy_dacpac_and_run_stored_procedure_from_it()
-{
-    new LocalDbTestContext(DataBaseName, message => _testOutputHelper.WriteLine(message))
-        .DeployDacpac()
-        .RunTest((connection, transaction) =>
-        {
-            var cmd = connection.CreateCommand();
-            cmd.CommandText = "spAddTwoNumbers";
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            cmd.AddParameterWithValue("@param1", 2);
-            cmd.AddParameterWithValue("@param2", 3);
-            cmd.Transaction = transaction;
-
-            var returnParameter = cmd.AddReturnParameter("@ReturnVal");
-
-            cmd.ExecuteNonQuery();
-            var result = returnParameter.Value;
-
-            result.Should().NotBeNull();
-            result.Should().Be(5);
-        }).TearDown();
-}
 ```
+
+## Using a normal localDb instance
+
+To use a normal persistent localDb instance (rather than a temporary one) provide a value for the optional string parameter `runUsingNormalLocalDbInstanceNamed` containing the name of the instance i.e. 'MSSQLLocalDB' or 'ProjectsV13'
+Or set an environment variable named "CSharpSqlTests_RunUsingNormalLocalDbInstance" containing the name of the instance.
+This is useful if you want to run tests in a CI build while using SqlCover for instance.
 
 This is mainly written to be an improvement in user friendliness over some of the t-SQL based test frameworks available
 

@@ -2,5 +2,6 @@
 (
 	[Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY, 
     [Name] NVARCHAR(50) NULL, 
-    [Address] NVARCHAR(500) NULL
+    [Address] NVARCHAR(500) NULL, 
+    [DateJoined] DATETIME NULL
 )

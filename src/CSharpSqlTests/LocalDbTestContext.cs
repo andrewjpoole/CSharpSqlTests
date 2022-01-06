@@ -153,10 +153,9 @@ namespace CSharpSqlTests
 
             var (runUsingTemporaryInstance, normalLocalDbInstanceName) = CheckForRunUsingNormalLocalDbInstanceEnvironmentVariable(runUsingNormalLocalDbInstanceNamed);
             if (runUsingTemporaryInstance)
-            {
                 _runUsingTemporaryLocalDbInstance = true;
+            else
                 runUsingNormalLocalDbInstanceNamed = normalLocalDbInstanceName;
-            }
 
             _lastLogTime = DateTime.Now;
 
@@ -186,7 +185,7 @@ namespace CSharpSqlTests
             // Open connection (to Master database)
             SqlConnection = GetNewSqlConnection();
             SqlConnection.Open();
-            LogTiming("connection opened");
+            LogTiming($"connection opened to instance {_instanceName}");
 
             if(!_runUsingTemporaryLocalDbInstance)
                 DropDatabaseIfExists();
@@ -314,6 +313,7 @@ namespace CSharpSqlTests
             var envVar = Environment.GetEnvironmentVariable(RunUsingNormalLocalDbInstanceEnvironmentVariableName);
             if (envVar != null)
             {
+                LogTiming($"Found environment variable which overrides the choice of localDb instance.");
                 runUsingTemporaryInstance = false;
                 normalLocalDbInstanceName = envVar;
             }
