@@ -12,5 +12,11 @@ namespace CSharpSqlTests
         {
             Parent = parent;
         }
+
+        public object? this[string columnName]
+        {
+            get => ColumnValues[columnName];
+            set => ColumnValues[columnName] = value;
+        }
     }
 }

@@ -1,6 +1,6 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 // ReSharper disable UnusedMember.Local
+#pragma warning disable CS1591
 
 namespace CSharpSqlTests
 {
@@ -70,7 +70,7 @@ namespace CSharpSqlTests
             cmd.CommandType = CommandType.Text;
             cmd.Transaction = Context.SqlTransaction;
 
-            Context.LastQueryResult = cmd.ExecuteNonQuery();
+            Context.LastNonReaderQueryResult = cmd.ExecuteNonQuery();
 
             return this;
         }
@@ -96,7 +96,7 @@ namespace CSharpSqlTests
             cmd.CommandType = CommandType.Text;
             cmd.Transaction = Context.SqlTransaction;
 
-            Context.LastQueryResult = cmd.ExecuteNonQuery();
+            Context.LastNonReaderQueryResult = cmd.ExecuteNonQuery();
             return this;
         }
     }

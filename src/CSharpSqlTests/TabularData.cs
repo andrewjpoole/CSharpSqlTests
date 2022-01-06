@@ -5,9 +5,13 @@ using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+// ReSharper disable InconsistentNaming
 
 namespace CSharpSqlTests
 {
+    /// <summary>
+    /// Class which represents a data base table structure with columns and rows, parsable to/from markdown table strings etc.
+    /// </summary>
     public class TabularData
     {
         /// <summary>
@@ -20,7 +24,7 @@ namespace CSharpSqlTests
         /// </summary>
         public List<TabularDataRow> Rows = new();
 
-        private static Func<string, object?> markdownStringValuesToSqlObjectValue = value =>
+        private static readonly Func<string, object?> markdownStringValuesToSqlObjectValue = value =>
         {
             if (DateTime.TryParse(value, out var valueAsDate))
                 return valueAsDate;
@@ -270,7 +274,10 @@ namespace CSharpSqlTests
         /// <summary>
         /// A method which creates a TabularData from the columns and rows returned from an IDataReader, usually the result of a call to ExceuteReader() on an IDbConnection etc. 
         /// </summary>
-        public static TabularData FromSqlDataReader(IDataReader dataReader)
+        /// <param name="dataReader">The IDataReader to use to populate the TabularData from</param>
+        /// <param name="leaveDataReaderOpen">Set this to true if the method should not call the Close method on the DataReader,
+        /// e.g. if you want to read multiple result sets. Please note you may have to call the Close method yourself in this case.</param>
+        public static TabularData FromSqlDataReader(IDataReader dataReader, bool leaveDataReaderOpen = false)
         {
             var tableDefinition = new TabularData();
 
@@ -298,7 +305,8 @@ namespace CSharpSqlTests
                 tableDefinition.Rows.Add(row);
             }
 
-            dataReader.Close();
+            if(!leaveDataReaderOpen)
+                dataReader.Close();
 
             return tableDefinition;
         }

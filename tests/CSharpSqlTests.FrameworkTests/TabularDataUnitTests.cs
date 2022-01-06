@@ -300,5 +300,45 @@ VALUES
 
             result.ColumnValues["Name"].Should().Be("James");
         }
+
+        [Fact]
+        public void TabularData_RowWhere_plus_TabularDataRow_indexer_can_be_used_for_assertions()
+        {
+            var id1 = Guid.NewGuid();
+            var id2 = Guid.NewGuid();
+
+            var tabularData = TabularData.CreateWithColumns("Id", "Name")
+                .AddRowWithValues(id1, "Andrew")
+                .AddRowWithValues(id2, "James");
+
+            var row = tabularData.RowWhere("Id", id2);
+                row["Name"].Should().Be("James");
+        }
+
+        [Fact]
+        public void TabularData_TabularDataRow_indexer_can_be_used_to_update_column_values()
+        {
+            var id1 = Guid.NewGuid();
+            var id2 = Guid.NewGuid();
+
+            var tabularData = TabularData.CreateWithColumns("Id", "Name")
+                .AddRowWithValues(id1, "Andrew")
+                .AddRowWithValues(id2, "James");
+
+            tabularData.RowWhere("Id", id2)["Name"] = "Jon";
+            tabularData.RowWhere("Id", id2)["Name"].Should().Be("Jon");
+        }
+
+        [Fact]
+        public void TabularData_TabularDataRow_indexer_can_be_used_to_add_column_values()
+        {
+            var id1 = Guid.NewGuid();
+
+            var row = new TabularDataRow(new TabularData());
+
+            row["Id"] = id1;
+            row.ColumnValues.Count.Should().Be(1);
+            row["Id"].Should().Be(id1);
+        }
     }
 }

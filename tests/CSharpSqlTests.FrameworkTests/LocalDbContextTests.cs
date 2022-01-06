@@ -11,7 +11,7 @@ namespace CSharpSqlTests.FrameworkTests
         {
             var sb = new StringBuilder();
 
-            var sut = new DacPacInfo("SampleDb");
+            var sut = new DacPacInfo("SampleDb", 6);
 
             sut.DacPacFound.Should().Be(true);
             sut.DacPacProjectName.Should().Be("SampleDb");

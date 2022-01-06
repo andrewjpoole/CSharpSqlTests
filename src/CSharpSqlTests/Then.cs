@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 // ReSharper disable UnusedMember.Local
+#pragma warning disable CS1591
 
 namespace CSharpSqlTests
 {
@@ -24,25 +25,16 @@ namespace CSharpSqlTests
         /// <exception cref="Exception">Exceptions are thrown if the LastQueryResult is null or does not contain a DataReader</exception>
         public Then FetchingTheReaderQueryResults(out TabularData results)
         {
-            if (Context.LastQueryResult is null)
-                throw new Exception("context.LastQueryResult is null");
-
-            var dataReader = (IDataReader)Context.LastQueryResult;
-
-            if (dataReader is null)
-                throw new Exception("context.LastQueryResult does not contain a IDataReader object");
-
-            var tableDataResult = TabularData.FromSqlDataReader(dataReader);
-
-            dataReader.Close();
-
+            if (Context.CurrentDataReader is null)
+                throw new Exception("context.CurrentDataReader is null");
+            
+            var tableDataResult = TabularData.FromSqlDataReader(Context.CurrentDataReader);
+            
             results = tableDataResult;
 
             return this;
         }
-
         
-
         /// <summary>
         /// A method which asserts that the context's LastQueryResult property should contain certain tabular data.
         /// </summary>
@@ -81,18 +73,11 @@ namespace CSharpSqlTests
         /// <param name="expectedData">A TabularData defining the data to assert.</param>
         public Then TheReaderQueryResultsShouldBe(TabularData expectedData)
         {
-            if (Context.LastQueryResult is null)
+            if (Context.CurrentDataReader is null)
                 throw new Exception("context.LastQueryResult is null");
-
-            var dataReader = (IDataReader)Context.LastQueryResult;
-
-            if (dataReader is null)
-                throw new Exception("context.LastQueryResult does not contain a IDataReader object");
-
-            var tableDataResult = TabularData.FromSqlDataReader(dataReader);
-
-            dataReader.Close();
-
+            
+            var tableDataResult = TabularData.FromSqlDataReader(Context.CurrentDataReader);
+            
             var areEqual = tableDataResult.IsEqualTo(expectedData, out var differences);
 
             if (areEqual) return this;
@@ -139,18 +124,11 @@ namespace CSharpSqlTests
         /// <param name="expectedData">A TabularData defining the data to assert.</param>
         public Then TheReaderQueryResultsShouldContain(TabularData expectedData)
         {
-            if (Context.LastQueryResult is null)
-                throw new Exception("context.LastQueryResult is null");
-
-            var dataReader = (IDataReader)Context.LastQueryResult;
-
-            if (dataReader is null)
-                throw new Exception("context.LastQueryResult does not contain a IDataReader object");
-
-            var tableDataResult = TabularData.FromSqlDataReader(dataReader);
-
-            dataReader.Close();
-
+            if (Context.CurrentDataReader is null)
+                throw new Exception("context.CurrentDataReader is null");
+            
+            var tableDataResult = TabularData.FromSqlDataReader(Context.CurrentDataReader);
+            
             var areEqual = tableDataResult.Contains(expectedData, out var differences);
 
             if (areEqual) return this;
@@ -170,9 +148,7 @@ namespace CSharpSqlTests
             cmd.CommandText = cmdText;
             cmd.CommandType = CommandType.Text;
             cmd.Transaction = Context.SqlTransaction;
-
-            Context.CloseDataReaderIfOpen();
-
+            
             returnValue = cmd.ExecuteScalar();
             
             return this;
@@ -191,16 +167,12 @@ namespace CSharpSqlTests
             cmd.CommandText = cmdText;
             cmd.CommandType = CommandType.Text;
             cmd.Transaction = Context.SqlTransaction;
-
-            Context.CloseDataReaderIfOpen();
-
+            
             returnValue = TabularData.FromSqlDataReader(cmd.ExecuteReader());
             
             return this;
         }
         
-        
-
         /// <summary>
         /// A method which executes a reader query and asserts that result should be equal to the supplied tabular data.
         /// </summary>

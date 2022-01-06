@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
-using System.Text;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -20,7 +18,7 @@ namespace CSharpSqlTests.FrameworkTests
 
             var expected = TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears");
 
-            mockContext.Setup(x => x.LastQueryResult).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
+            mockContext.Setup(x => x.CurrentDataReader).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
 
             var sut = new Then(mockContext.Object);
 
@@ -34,7 +32,7 @@ namespace CSharpSqlTests.FrameworkTests
 
             var expected = TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears");
             
-            mockContext.Setup(x => x.LastQueryResult).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("fred", "george")).Object);
+            mockContext.Setup(x => x.CurrentDataReader).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("fred", "george")).Object);
 
             var sut = new Then(mockContext.Object);
 
@@ -46,7 +44,7 @@ namespace CSharpSqlTests.FrameworkTests
         {
             var mockContext = new Mock<ILocalDbTestContext>();
         
-            mockContext.Setup(x => x.LastQueryResult).Returns(null);
+            mockContext.Setup(x => x.CurrentDataReader).Returns<IDataReader?>(null);
 
             var sut = new Then(mockContext.Object);
 
@@ -60,7 +58,7 @@ namespace CSharpSqlTests.FrameworkTests
 
             var expected = TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears").ToMarkdownTableString();
 
-            mockContext.Setup(x => x.LastQueryResult).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
+            mockContext.Setup(x => x.CurrentDataReader).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
 
             var sut = new Then(mockContext.Object);
 
@@ -74,7 +72,7 @@ namespace CSharpSqlTests.FrameworkTests
 
             var expected = TabularData.CreateWithColumns("B").AddRowWithValues("pears");
 
-            mockContext.Setup(x => x.LastQueryResult).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
+            mockContext.Setup(x => x.CurrentDataReader).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
 
             var sut = new Then(mockContext.Object);
 
@@ -88,7 +86,7 @@ namespace CSharpSqlTests.FrameworkTests
 
             var expected = TabularData.CreateWithColumns("B").AddRowWithValues("pears");
             
-            mockContext.Setup(x => x.LastQueryResult).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
+            mockContext.Setup(x => x.CurrentDataReader).Returns(SetupDataReader(TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears")).Object);
 
             var sut = new Then(mockContext.Object);
 

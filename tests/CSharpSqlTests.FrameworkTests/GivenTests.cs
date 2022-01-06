@@ -18,7 +18,7 @@ namespace CSharpSqlTests.FrameworkTests
 
             sut.TheDacpacIsDeployed("dacpacName");
 
-            context.Verify(x => x.DeployDacpac("dacpacName"), Times.Once);
+            context.Verify(x => x.DeployDacpac("dacpacName", 4), Times.Once);
         }
 
         [Fact]

@@ -11,7 +11,7 @@ namespace CSharpSqlTests.xUnit
         /// <param name="expected">An object containing the value to assert</param>
         public static Then TheNonReaderQueryResultShouldBe(this Then then, object expected)
         {
-            Assert.True(then.Context.LastQueryResult?.Equals(expected));
+            Assert.True(then.Context.LastNonReaderQueryResult?.Equals(expected));
             return then;
         }
 

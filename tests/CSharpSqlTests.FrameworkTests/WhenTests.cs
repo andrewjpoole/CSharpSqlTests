@@ -40,14 +40,13 @@ namespace CSharpSqlTests.FrameworkTests
 
             _mockDbConnection.Verify(x => x.CreateCommand(), Times.Once);
             _mockCmd.Verify(x => x.ExecuteNonQuery(), Times.Once);
-            _mockContext.VerifySet(x => x.LastQueryResult = 13, Times.Once());
+            _mockContext.VerifySet(x => x.LastNonReaderQueryResult = 13, Times.Once());
         }
 
         [Fact]
         public void TheStoredProcedureIsExecutedWithReturnParameter_executes_a_stored_proc_and_returns_the_result_via_out_arg()
         {
-            _mockContext.Setup(x => x.LastQueryResult).Returns(13); // this is what is returned in the out var
-
+            _mockParam.Setup(x => x.Value).Returns(13);
             _sut.TheStoredProcedureIsExecutedWithReturnParameter("spTest", out var result,("Input", 12));
         
             result.Should().Be(13);
@@ -60,7 +59,7 @@ namespace CSharpSqlTests.FrameworkTests
 
             _mockDbConnection.Verify(x => x.CreateCommand(), Times.Once);
             _mockCmd.Verify(x => x.ExecuteReader(), Times.Once);
-            _mockContext.VerifySet(x => x.LastQueryResult = It.IsAny<IDataReader>(), Times.Once());
+            _mockContext.VerifySet(x => x.CurrentDataReader = It.IsAny<IDataReader>(), Times.Once());
         }
     
         [Fact]
@@ -69,17 +68,16 @@ namespace CSharpSqlTests.FrameworkTests
             _sut.TheScalarQueryIsExecuted("SELECT * FROM Test");
 
             _mockCmd.Verify(x => x.ExecuteScalar(), Times.Once);
-            _mockContext.VerifySet(x => x.LastQueryResult = It.IsAny<object>(), Times.Once());
+            _mockContext.VerifySet(x => x.LastNonReaderQueryResult = It.IsAny<object>(), Times.Once());
         }
 
         [Fact]
         public void TheScalarQueryIsExecuted_executes_a_scalerquery_on_the_context_and_returns_the_result_via_out_arg()
         {
-            _mockContext.Setup(x => x.LastQueryResult).Returns(13); // this is what is returned in the out var
+            _mockCmd.Setup(x => x.ExecuteScalar()).Returns(13);
             _sut.TheScalarQueryIsExecuted("SELECT * FROM Test", out var result);
 
             _mockCmd.Verify(x => x.ExecuteScalar(), Times.Once);
-            _mockContext.VerifySet(x => x.LastQueryResult = It.IsAny<object>(), Times.Once());
 
             result.Should().Be(13);
         }
@@ -90,18 +88,17 @@ namespace CSharpSqlTests.FrameworkTests
             _sut.TheReaderQueryIsExecuted("SELECT * FROM Test");
 
             _mockCmd.Verify(x => x.ExecuteReader(), Times.Once);
-            _mockContext.VerifySet(x => x.LastQueryResult = It.IsAny<IDataReader>(), Times.Once());
+            _mockContext.VerifySet(x => x.CurrentDataReader = It.IsAny<IDataReader>(), Times.Once());
         }
 
         [Fact]
         public void TheReaderQueryIsExecuted_executes_a_readerquery_on_the_context_and_returns_the_result_via_out_arg()
         {
             var mockReader = new Mock<IDataReader>();
-            _mockContext.Setup(x => x.LastQueryResult).Returns(mockReader.Object); // this is what is returned in the out var
+            _mockCmd.Setup(x => x.ExecuteReader()).Returns(mockReader.Object);
             _sut.TheReaderQueryIsExecuted("SELECT * FROM Test", out var readerResult);
 
             _mockCmd.Verify(x => x.ExecuteReader(), Times.Once);
-            _mockContext.VerifySet(x => x.LastQueryResult = It.IsAny<IDataReader>(), Times.Once());
 
             readerResult.Should().Be(mockReader.Object);
         }

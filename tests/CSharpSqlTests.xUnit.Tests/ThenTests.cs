@@ -10,7 +10,7 @@ namespace CSharpSqlTests.xUnit.Tests
         {
             var mockContext = new Mock<ILocalDbTestContext>();
 
-            mockContext.Setup(x => x.LastQueryResult).Returns(23);
+            mockContext.Setup(x => x.LastNonReaderQueryResult).Returns(23);
 
             var sut = new Then(mockContext.Object);
 

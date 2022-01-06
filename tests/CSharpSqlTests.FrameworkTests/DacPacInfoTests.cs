@@ -1,9 +1,6 @@
-using System;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using FluentAssertions;
 using Xunit;
 
@@ -14,7 +11,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void Ctor_finds_existing_dacpac_by_name()
         {
-            var sut = new DacPacInfo("SampleDb");
+            var sut = new DacPacInfo("SampleDb", 6);
 
             sut.DacPacFound.Should().BeTrue();
             sut.DacPacPath.Should().EndWith("SampleDb.dacpac");
@@ -23,7 +20,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void Ctor_doesnt_find_non_existant_dacpac_by_name()
         {
-            var sut = new DacPacInfo("j34hg54kjg5");
+            var sut = new DacPacInfo("j34hg54kjg5", 4);
 
             sut.DacPacFound.Should().BeFalse();
             sut.DacPacPath.Should().BeEmpty();
@@ -36,7 +33,7 @@ namespace CSharpSqlTests.FrameworkTests
             var solutionDir = currentDirectory.Parent?.Parent?.Parent?.Parent?.Parent;
             var dacPacs = solutionDir!.EnumerateFiles("..\\examples\\SampleDb.dacpac", SearchOption.AllDirectories).ToList();
 
-            var sut = new DacPacInfo(dacPacs.First().FullName);
+            var sut = new DacPacInfo(dacPacs.First().FullName, 4);
 
             sut.DacPacFound.Should().BeTrue();
             sut.DacPacPath.Should().EndWith("SampleDb.dacpac");
@@ -45,8 +42,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void Ctor_doesnt_find_non_existant_dacpac_by_absolute_path()
         {
-            Assert.Throws<FileNotFoundException>(() => { new DacPacInfo("c:\\temp\\temp2\\temp3\\blah.dacpac"); });
-        
+            Assert.Throws<FileNotFoundException>(() => { new DacPacInfo("c:\\temp\\temp2\\temp3\\blah.dacpac", 4); });
         }
     }
 }

@@ -27,7 +27,7 @@ namespace SampleDatabaseTestsXunit
                 Given.UsingThe(_context);
 
                 When.UsingThe(_context)
-                    .TheStoredProcedureIsExecutedWithReturnParameter("spAddTwoNumbers", out var returnValue, ("@param1", 5), ("@param2", 12));
+                    .TheStoredProcedureIsExecutedWithReturnParameter("spAddTwoNumbers", ("@param1", 5), ("@param2", 12));
 
                 Then.UsingThe(_context)
                     .TheNonReaderQueryResultShouldBe(17);
@@ -216,7 +216,7 @@ namespace SampleDatabaseTestsXunit
                     .TheReaderQueryIsExecuted("SELECT * FROM Customers", out var result);
 
                 result.Rows.Count.Should().Be(1);
-                result.Rows.First().ColumnValues["Id"].Should().Be(2);
+                result.Rows.First()["Id"].Should().Be(2);
 
             });
         }
