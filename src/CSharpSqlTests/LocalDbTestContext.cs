@@ -98,10 +98,10 @@ namespace CSharpSqlTests
         private readonly string _databaseName;
         private readonly Action<string>? _logTiming;
         private readonly bool _runUsingTemporaryLocalDbInstance;
+        private readonly bool _stopNormalInstanceAfterwards;
         private readonly ISqlLocalDbInstanceManager _manager;
         private readonly string _instanceName;
-        private readonly DateTime _instanceStartedTime;
-        private DateTime _lastLogTime;
+        private readonly DateTime _testRunStartedTime;
         private const string RunUsingNormalLocalDbInstanceEnvironmentVariableName = "CSharpSqlTests_RunUsingNormalLocalDbInstance";
         private IDataReader? _dataReader;
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable, reference required when using temporary localDb instance
@@ -157,7 +157,7 @@ namespace CSharpSqlTests
             else
                 runUsingNormalLocalDbInstanceNamed = normalLocalDbInstanceName;
 
-            _lastLogTime = DateTime.Now;
+            _testRunStartedTime = DateTime.Now;
 
             var localDbApi = new SqlLocalDbApi();
             
@@ -166,26 +166,31 @@ namespace CSharpSqlTests
                 _temporaryInstance = localDbApi.CreateTemporaryInstance();
                 _manager = _temporaryInstance.Manage();
                 
-                _instanceStartedTime = DateTime.Now;
-                LogTiming($"temporary localDb instance created named {_temporaryInstance.Name}");
+                Log($"Temporary localDb instance created named {_temporaryInstance.Name}");
 
                 _instanceName = _temporaryInstance.Name;
             }
             else
             {
+                Log($"Using normal persistent localDb instance named {runUsingNormalLocalDbInstanceNamed}, if the database already exists in this instance it will be overwritten.");
+                
                 var normalInstance = localDbApi.GetOrCreateInstance(runUsingNormalLocalDbInstanceNamed);
                 _manager = normalInstance.Manage();
-                _manager.Start();
+
+                if (!normalInstance.IsRunning)
+                {
+                    Log($"Starting localDb instance {_instanceName}");
+                    _stopNormalInstanceAfterwards = true;
+                    _manager.Start();
+                }
 
                 _instanceName = normalInstance.Name;
-
-                LogTiming($"Using normal persistent localDb instance named {runUsingNormalLocalDbInstanceNamed}, if the database already exists in this instance it will be overwritten.");
             }
 
             // Open connection (to Master database)
             SqlConnection = GetNewSqlConnection();
             SqlConnection.Open();
-            LogTiming($"connection opened to instance {_instanceName}");
+            LogTiming($"Connection opened to instance {_instanceName}");
 
             if(!_runUsingTemporaryLocalDbInstance)
                 DropDatabaseIfExists();
@@ -199,14 +204,13 @@ namespace CSharpSqlTests
             createDbCmd.CommandType = CommandType.Text;
             createDbCmd.ExecuteNonQuery();
             
-            LogTiming("database connected");
-            
-            // ready to run tests in individual transactions
+            LogTiming("LocalDbTestContext constructor completed");
         }
         
         /// <inheritdoc />
         public LocalDbTestContext RunTest(Action<IDbConnection, IDbTransaction> useConnection)
         {
+            LogTiming("RunTest() method called");
             CloseDataReaderIfOpen();
 
             SqlConnection.Close();
@@ -253,7 +257,7 @@ namespace CSharpSqlTests
             if (!dacPacInfo.DacPacFound)
                 throw new Exception($"Cant deploy dacpac, no project found with name {dacpacProjectName}");
 
-            LogTiming($"Deploying {dacPacInfo.DacPacPath}");
+            Log($"Deploying {dacPacInfo.DacPacPath}");
 
             var svc = new DacServices(SqlConnection.ConnectionString);
 
@@ -269,7 +273,7 @@ namespace CSharpSqlTests
                 dacOptions
             );
 
-            LogTiming("dacpac deployed");
+            LogTiming("DacPac deployed");
 
             return this;
         }
@@ -277,25 +281,30 @@ namespace CSharpSqlTests
         /// <inheritdoc />
         public void TearDown()
         {
-            LogTiming("tearing down");
-
-            _manager.Stop();
-
+            LogTiming("Tearing down");
+            
             if (_runUsingTemporaryLocalDbInstance)
             {
-                LogTiming("instance manager stopped");
+                _manager.Stop();
+
+                LogTiming("Instance stopped");
 
                 var tempInstanceDir = new DirectoryInfo(_instancePath);
 
                 tempInstanceDir.Delete(true);
 
-                LogTiming("instance directory deleted");
+                LogTiming("Instance directory deleted");
+            }
+            else
+            {
+                if (_stopNormalInstanceAfterwards)
+                {
+                    Log("Stopping localDb instance (because it wasn't running beforehand)");
+                    _manager.Stop();
+                }
             }
 
-            var elapsed = DateTime.Now - _instanceStartedTime;
-
-            if(_logTiming is not null)
-                _logTiming($"Test run completed after {Math.Round(elapsed.TotalSeconds, 2)}s");
+            LogTiming($"Test run completed");
         }
 
         private (bool RunUsingTemporaryInstance, string NormalLocalDbInstanceName) CheckForRunUsingNormalLocalDbInstanceEnvironmentVariable(string runUsingNormalLocalDbInstanceNamed)
@@ -308,12 +317,11 @@ namespace CSharpSqlTests
                 runUsingTemporaryInstance = false;
                 normalLocalDbInstanceName = runUsingNormalLocalDbInstanceNamed;
             }
-
-            // Environment variable may override parameter
+            
             var envVar = Environment.GetEnvironmentVariable(RunUsingNormalLocalDbInstanceEnvironmentVariableName);
             if (envVar != null)
             {
-                LogTiming($"Found environment variable which overrides the choice of localDb instance.");
+                Log($"Found environment variable which overrides the choice of localDb instance");
                 runUsingTemporaryInstance = false;
                 normalLocalDbInstanceName = envVar;
             }
@@ -341,9 +349,13 @@ END";
                 return;
 
             var now = DateTime.Now;
-            var elapsed = now - _lastLogTime;
-            _logTiming($"{message} after {Math.Round(elapsed.TotalSeconds, 2)}s");
-            _lastLogTime = DateTime.Now;
+            var elapsedTotal = now - _testRunStartedTime;
+            _logTiming($"{Math.Round(elapsedTotal.TotalSeconds, 2)}s {message}");
+        }
+
+        private void Log(string message)
+        {
+            _logTiming?.Invoke($"{message}");
         }
     }
 }
