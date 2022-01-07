@@ -40,6 +40,7 @@ namespace CSharpSqlTests
         /// </summary>
         /// <param name="expectedMarkDownTableString">
         /// A markdown table string containing the data to assert
+        /// </param>
         /// <example>
         /// <code>
         ///  | Id | Type | Make | Model   |
@@ -57,7 +58,6 @@ namespace CSharpSqlTests
         /// false       -> will be interpreted as boolean false
         /// </code>
         /// </example>
-        /// </param>
         public Then TheReaderQueryResultsShouldBe(string expectedMarkDownTableString)
         {
             var expectedTableData = TabularData.FromMarkdownTableString(expectedMarkDownTableString);
@@ -91,6 +91,7 @@ namespace CSharpSqlTests
         /// </summary>
         /// <param name="expectedMarkDownTableString">
         /// A markdown table string containing the data to assert
+        /// </param>
         /// <example>
         /// <code>
         ///  | Id | Type | Make | Model   |
@@ -108,7 +109,6 @@ namespace CSharpSqlTests
         /// false       -> will be interpreted as boolean false
         /// </code>
         /// </example>
-        /// </param>
         public Then TheReaderQueryResultsShouldContain(string expectedMarkDownTableString)
         {
             var expectedTableData = TabularData.FromMarkdownTableString(expectedMarkDownTableString);
@@ -179,6 +179,7 @@ namespace CSharpSqlTests
         /// <param name="cmdText">A string containing the Sql query</param>
         /// <param name="expectedMarkDownTableString">
         /// A markdown table string containing the data to assert
+        /// </param>
         /// <example>
         /// <code>
         ///  | Id | Type | Make | Model   |
@@ -196,7 +197,6 @@ namespace CSharpSqlTests
         /// false       -> will be interpreted as boolean false
         /// </code>
         /// </example>
-        /// </param>
         public Then TheReaderQueryIsExecutedAndIsEqualTo(string cmdText, string expectedMarkDownTableString)
         {
             TheReaderQueryIsExecuted(cmdText, out var returnValue);
@@ -217,6 +217,7 @@ namespace CSharpSqlTests
         /// <param name="cmdText">A string containing the Sql query</param>
         /// <param name="expectedMarkDownTableString">
         /// A markdown table string containing the data to assert
+        /// </param>
         /// <example>
         /// <code>
         ///  | Id | Type | Make | Model   |
@@ -234,7 +235,6 @@ namespace CSharpSqlTests
         /// false       -> will be interpreted as boolean false
         /// </code>
         /// </example>
-        /// </param>
         public Then TheReaderQueryIsExecutedAndContains(string cmdText, string expectedMarkDownTableString)
         {
             TheReaderQueryIsExecuted(cmdText, out var returnValue);

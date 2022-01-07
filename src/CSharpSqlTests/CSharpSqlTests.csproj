@@ -12,9 +12,11 @@
 	<RepositoryUrl>https://github.com/andrewjpoole/CSharpSqlTests</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
 	<PackageTags>sql testing; stored procedure testing; dacpac testing;</PackageTags>
-	<Version>1.4.0</Version>
+	<Version>1.6.0</Version>
 	<PackageReleaseNotes>
-		1.4.0) Added support for running in an ordinary persistent localDb instance i.e. for SqlCover etc, also some internal improvements around use of IDataReader and some tidying up.
+		1.6.0) Added support for running in an ordinary persistent localDb instance i.e. for SqlCover etc, also some internal improvements around use of IDataReader and some tidying up.
+		1.5.0) Removed some experimental code for parallel execution - which is not supported currently.
+		1.4.0) Added some additional methods, the ability to set transaction isolation level to aid debugging, fixed bug when using Guids.
 		1.3.0) Added some more When and Then methods and a ValueAt() method for looking up data from a TabularData.
 		1.2.0) Then has some new query methods. Given, When and Then now have a public context to allow the use of extension methods, PDBs included in package for debugging.
 		1.1.0) targeted netstandard2, made Given, When and Then classes partial and added some triple slash comments.
