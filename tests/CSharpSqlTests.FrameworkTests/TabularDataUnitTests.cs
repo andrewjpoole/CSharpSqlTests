@@ -40,6 +40,20 @@ namespace CSharpSqlTests.FrameworkTests
         }
 
         [Fact]
+        public void tableData_FromString_method_handles_quote_numeric_strings()
+        {
+            var testString = @"
+| column1     | column2 |
+| ----------- | ------- |
+| 123         | ""2""   |";
+
+            var tabularData = TabularData.FromMarkdownTableString(testString);
+
+            tabularData.Rows[0].ColumnValues["column1"].Should().Be(123);
+            tabularData.Rows[0].ColumnValues["column2"].Should().Be("2");
+        }
+
+        [Fact]
         public void tableData_FromString_method_returns_a_tableData_when_string_is_indented()
         {
             var testString = @" | column1 | column2 |
@@ -249,7 +263,25 @@ VALUES
 ,('{id2}','James')
 ");
         }
-        
+
+        [Fact]
+        public void TabularData_ToSqlString_correctly_handles_quoted_numeric_strings()
+        {
+
+            var tabularData = TabularData.CreateWithColumns("Name", "Col2")
+                .AddRowWithValues("Andrew", 123)
+                .AddRowWithValues("James", "2");
+
+            var sqlInsert = tabularData.ToSqlString("Test");
+
+            sqlInsert.Should().Be(@$"INSERT INTO Test
+(Name,Col2)
+VALUES
+('Andrew',123)
+,('James','2')
+");
+        }
+
         [Fact]
         public void TabularData_ToDataTable_produces_expected_datatable()
         {

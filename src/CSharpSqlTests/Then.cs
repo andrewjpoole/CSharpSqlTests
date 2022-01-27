@@ -34,7 +34,7 @@ namespace CSharpSqlTests
 
             return this;
         }
-        
+
         /// <summary>
         /// A method which asserts that the context's LastQueryResult property should contain certain tabular data.
         /// </summary>
@@ -56,6 +56,7 @@ namespace CSharpSqlTests
         /// emptyString -> will be interpreted as an empty string
         /// true        -> will be interpreted as boolean true
         /// false       -> will be interpreted as boolean false
+        /// "2"         -> will be preserved as a string
         /// </code>
         /// </example>
         public Then TheReaderQueryResultsShouldBe(string expectedMarkDownTableString)
@@ -107,6 +108,7 @@ namespace CSharpSqlTests
         /// emptyString -> will be interpreted as an empty string
         /// true        -> will be interpreted as boolean true
         /// false       -> will be interpreted as boolean false
+        /// "2"         -> will be preserved as a string
         /// </code>
         /// </example>
         public Then TheReaderQueryResultsShouldContain(string expectedMarkDownTableString)
@@ -172,7 +174,7 @@ namespace CSharpSqlTests
             
             return this;
         }
-        
+
         /// <summary>
         /// A method which executes a reader query and asserts that result should be equal to the supplied tabular data.
         /// </summary>
@@ -195,6 +197,7 @@ namespace CSharpSqlTests
         /// emptyString -> will be interpreted as an empty string
         /// true        -> will be interpreted as boolean true
         /// false       -> will be interpreted as boolean false
+        /// "2"         -> will be preserved as a string
         /// </code>
         /// </example>
         public Then TheReaderQueryIsExecutedAndIsEqualTo(string cmdText, string expectedMarkDownTableString)
@@ -233,6 +236,7 @@ namespace CSharpSqlTests
         /// emptyString -> will be interpreted as an empty string
         /// true        -> will be interpreted as boolean true
         /// false       -> will be interpreted as boolean false
+        /// "2"         -> will be preserved as a string
         /// </code>
         /// </example>
         public Then TheReaderQueryIsExecutedAndContains(string cmdText, string expectedMarkDownTableString)

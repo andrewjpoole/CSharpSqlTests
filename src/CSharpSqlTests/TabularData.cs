@@ -32,6 +32,11 @@ namespace CSharpSqlTests
             if (Guid.TryParse(value, out var valueAsGuid))
                 return valueAsGuid;
 
+            if (value.StartsWith("\"") && value.EndsWith("\""))
+            {
+                return value.Substring(1, value.Length - 2); // trim off quotes and preserve as string
+            }
+
             if (int.TryParse(value, out var valueAsInt))
                 return valueAsInt;
 
@@ -144,6 +149,7 @@ namespace CSharpSqlTests
         /// emptyString -> will be interpreted as an empty string
         /// true        -> will be interpreted as boolean true
         /// false       -> will be interpreted as boolean false
+        /// "2"         -> will be preserved as a string
         /// </code>
         /// </example>
         /// </summary>

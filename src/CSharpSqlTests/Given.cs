@@ -49,6 +49,7 @@ namespace CSharpSqlTests
         /// emptyString -> will be interpreted as an empty string
         /// true        -> will be interpreted as boolean true
         /// false       -> will be interpreted as boolean false
+        /// "2"         -> will be preserved as a string
         /// </code>
         /// </example>
         /// </param>
