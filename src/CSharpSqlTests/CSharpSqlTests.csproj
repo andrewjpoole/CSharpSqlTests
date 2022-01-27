@@ -39,9 +39,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="6.2.0" />
+    <PackageReference Include="FluentAssertions" Version="6.4.0" />
     <PackageReference Include="MartinCostello.SqlLocalDb" Version="3.1.0" />
-    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="160.5371.2-preview" />
+    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="160.5400.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
 
