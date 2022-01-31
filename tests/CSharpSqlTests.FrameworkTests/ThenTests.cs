@@ -14,7 +14,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void TheReaderQueryResultsShouldBe_compares_LastQueryResult_as_reader_with_parameter()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
 
             var expected = TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears");
 
@@ -28,7 +28,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void TheReaderQueryResultsShouldBe_compares_LastQueryResult_as_reader_with_parameter_and_fails_if_different()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
 
             var expected = TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears");
             
@@ -42,7 +42,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void TheReaderQueryResultsShouldBe_throws_if_datareader_is_null()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
         
             mockContext.Setup(x => x.CurrentDataReader).Returns<IDataReader?>(null);
 
@@ -54,7 +54,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void TheReaderQueryResultsShouldBe_passed_a_markdown_string_compares_LastQueryResult_as_reader_with_string()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
 
             var expected = TabularData.CreateWithColumns("A", "B").AddRowWithValues("apples", "pears").ToMarkdownTableString();
 
@@ -68,7 +68,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void TheReaderQueryResultsShouldContains_compares_LastQueryResult_as_reader_with_parameter()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
 
             var expected = TabularData.CreateWithColumns("B").AddRowWithValues("pears");
 
@@ -82,7 +82,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void TheReaderQueryResultsShouldContains_compares_LastQueryResult_as_reader_with_string()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
 
             var expected = TabularData.CreateWithColumns("B").AddRowWithValues("pears");
             
@@ -126,9 +126,9 @@ namespace CSharpSqlTests.FrameworkTests
 
         }
 
-        private (Mock<ILocalDbTestContext> MockContext, Mock<IDbCommand> MockCommand) GetMockedContext()
+        private (Mock<IDbTestContext> MockContext, Mock<IDbCommand> MockCommand) GetMockedContext()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
             var mockParam = new Mock<IDbDataParameter>();
             var mockCmd = new Mock<IDbCommand>();
             var mockParamCollection = new Mock<IDataParameterCollection>();
@@ -188,7 +188,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void And_just_returns_the_then()
         {
-            var context = new Mock<ILocalDbTestContext>();
+            var context = new Mock<IDbTestContext>();
 
             var sut = new Then(context.Object);
 
@@ -200,7 +200,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void UsingThe_assigns_the_context_and_returns_the_then()
         {
-            var context = new Mock<ILocalDbTestContext>();
+            var context = new Mock<IDbTestContext>();
 
             var sut = Then.UsingThe(context.Object);
 

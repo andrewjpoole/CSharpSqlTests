@@ -7,11 +7,11 @@ namespace SampleDatabaseTestsXunit
 {
     public class LocalDbContextFixture : IDisposable
     {
-        public LocalDbTestContext Context;
+        public DbTestContext Context;
 
         public LocalDbContextFixture(IMessageSink sink)
         {
-            Context = new LocalDbTestContext("SampleDb", log => sink.OnMessage(new DiagnosticMessage(log)));
+            Context = new DbTestContext("SampleDb", DbTestContext.DbTestContextMode.TemporaryLocalDbInstance, log => sink.OnMessage(new DiagnosticMessage(log)));
             Context.DeployDacpac(maxSearchDepth:6);
         }       
 

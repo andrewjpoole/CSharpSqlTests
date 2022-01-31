@@ -6,14 +6,14 @@ namespace CSharpSqlTests
 {
     public class Given
     {
-        public readonly ILocalDbTestContext Context;
+        public readonly IDbTestContext Context;
 
-        public Given(ILocalDbTestContext context)
+        public Given(IDbTestContext context)
         {
             Context = context;
         }
 
-        public static Given UsingThe(ILocalDbTestContext context) => new(context);
+        public static Given UsingThe(IDbTestContext context) => new(context);
 
         public Given And => this;
         

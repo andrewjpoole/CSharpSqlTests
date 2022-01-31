@@ -14,7 +14,7 @@ namespace CSharpSqlTests.NUit.Tests
         [Test]
         public void Test1()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
 
             mockContext.Setup(x => x.LastNonReaderQueryResult).Returns(23);
 

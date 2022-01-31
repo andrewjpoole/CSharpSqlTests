@@ -12,7 +12,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void TheDacPacIsDeployed_calls_DeployDacpac_on_context()
         {
-            var context = new Mock<ILocalDbTestContext>();
+            var context = new Mock<IDbTestContext>();
 
             var sut = new Given(context.Object);
 
@@ -24,7 +24,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void TheFollowingDataExistsInTheTable_calls_ExecuteNonQueryc_on_cmd_and_writes_log()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
             var mockConnection = new Mock<IDbConnection>();
             var mockCommand = new Mock<IDbCommand>();
 
@@ -41,7 +41,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void TheFollowingDataExistsInTheTable_logs_exceptions_thrown_during_sql_execute()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
             var mockConnection = new Mock<IDbConnection>();
             var mockCommand = new Mock<IDbCommand>();
 
@@ -57,7 +57,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void TheFollowingSqlStatementIsExecuted_calls_ExecuteNonQueryc_on_cmd()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
             var mockConnection = new Mock<IDbConnection>();
             var mockCommand = new Mock<IDbCommand>();
 
@@ -74,7 +74,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void TheFollowingSqlStatementIsExecuted_logs_exceptions_thrown_during_sql_execute()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
             var mockConnection = new Mock<IDbConnection>();
             var mockCommand = new Mock<IDbCommand>();
 
@@ -91,7 +91,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void TheForeignKeyConstraintIsRemoved_calls_ExecuteNonQueryc_on_cmd()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
             var mockConnection = new Mock<IDbConnection>();
             var mockCommand = new Mock<IDbCommand>();
 
@@ -109,7 +109,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void And_just_returns_the_given()
         {
-            var context = new Mock<ILocalDbTestContext>();
+            var context = new Mock<IDbTestContext>();
 
             var sut = new Given(context.Object);
 

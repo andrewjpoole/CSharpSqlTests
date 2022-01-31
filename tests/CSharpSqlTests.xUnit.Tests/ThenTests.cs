@@ -8,7 +8,7 @@ namespace CSharpSqlTests.xUnit.Tests
         [Fact]
         public void TheNonReaderQueryResultShouldBe_compares_LastQueryResult_with_parameter()
         {
-            var mockContext = new Mock<ILocalDbTestContext>();
+            var mockContext = new Mock<IDbTestContext>();
 
             mockContext.Setup(x => x.LastNonReaderQueryResult).Returns(23);
 

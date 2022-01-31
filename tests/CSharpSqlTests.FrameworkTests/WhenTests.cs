@@ -7,7 +7,7 @@ namespace CSharpSqlTests.FrameworkTests
 {
     public class WhenTests
     {
-        private readonly Mock<ILocalDbTestContext> _mockContext;
+        private readonly Mock<IDbTestContext> _mockContext;
         private readonly Mock<IDbDataParameter> _mockParam;
         private readonly Mock<IDbCommand> _mockCmd;
         private readonly Mock<IDataParameterCollection> _mockParamCollection;
@@ -17,7 +17,7 @@ namespace CSharpSqlTests.FrameworkTests
 
         public WhenTests()
         {
-            _mockContext = new Mock<ILocalDbTestContext>();
+            _mockContext = new Mock<IDbTestContext>();
             _mockParam = new Mock<IDbDataParameter>();
             _mockCmd = new Mock<IDbCommand>();
             _mockParamCollection = new Mock<IDataParameterCollection>();
@@ -118,7 +118,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void And_just_returns_the_when()
         {
-            var context = new Mock<ILocalDbTestContext>();
+            var context = new Mock<IDbTestContext>();
 
             var sut = new When(context.Object);
 
@@ -130,7 +130,7 @@ namespace CSharpSqlTests.FrameworkTests
         [Fact]
         public void UsingThe_assigns_the_context_and_returns_the_when()
         {
-            var context = new Mock<ILocalDbTestContext>();
+            var context = new Mock<IDbTestContext>();
 
             var sut = When.UsingThe(context.Object);
 

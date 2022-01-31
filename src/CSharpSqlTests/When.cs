@@ -6,14 +6,14 @@ namespace CSharpSqlTests
 {
     public class When
     {
-        public readonly ILocalDbTestContext Context;
+        public readonly IDbTestContext Context;
 
-        public When(ILocalDbTestContext context)
+        public When(IDbTestContext context)
         {
             Context = context;
         }
         
-        public static When UsingThe(ILocalDbTestContext context) => new(context);
+        public static When UsingThe(IDbTestContext context) => new(context);
 
         public When And => this;
         

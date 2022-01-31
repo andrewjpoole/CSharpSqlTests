@@ -11,7 +11,7 @@ namespace SampleDatabaseTestsXunit
     public class SampleDatabaseTestsUsingASingleContext : IClassFixture<LocalDbContextFixture>
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly LocalDbTestContext _context;
+        private readonly DbTestContext _context;
 
         public SampleDatabaseTestsUsingASingleContext(ITestOutputHelper testOutputHelper, LocalDbContextFixture localDbContextFixture)
         {
