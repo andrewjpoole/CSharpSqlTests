@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
-using System.IO;
-using MartinCostello.SqlLocalDb;
 using Microsoft.SqlServer.Dac;
 // ReSharper disable InconsistentNaming
 
 namespace CSharpSqlTests
 {
-
     /// <summary>
     /// Class which abstracts the creation, management and interaction with localDb
     /// </summary>
@@ -18,21 +14,11 @@ namespace CSharpSqlTests
         private ISqlDatabaseContext _context;
         private readonly string _databaseName;
         private readonly Action<string>? _logTiming;
-        private readonly bool _runUsingTemporaryLocalDbInstance;
-        //private readonly bool _stopNormalInstanceAfterwards;
-        //private readonly ISqlLocalDbInstanceManager _manager;
-        //private readonly string _instanceName;
         private readonly DateTime _testRunStartedTime;
-        
         private IDataReader? _dataReader;
-        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable, reference required when using temporary localDb instance
-        //private readonly TemporarySqlLocalDbInstance? _temporaryInstance;
-
-        //private string _instancePath =>
-        //    $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Microsoft\\Microsoft SQL Server Local DB\\Instances\\{_instanceName}";
-
+        
         /// <inheritdoc />
-        public IDbConnection SqlConnection { get; private set; }
+        public IDbConnection? SqlConnection { get; private set; }
 
         /// <inheritdoc />
         public IDbTransaction? SqlTransaction { get; private set; }
@@ -58,16 +44,7 @@ namespace CSharpSqlTests
 
         /// <inheritdoc />
         public Dictionary<string, object?> State { get; set; } = new();
-
-
-        public enum DbTestContextMode
-        {
-            ExistingDatabaseViaConnectionString,
-            TemporaryLocalDbInstance,
-            ExistingLocalDbInstanceViaInstanceName
-        }
-
-
+        
         /// <summary>
         /// Constructs a DbTestContext, which will create a temporary localDb instance,
         /// unless runUsingNormalLocalDbInstanceNamed is set or an environment variable named CSharpSqlTests_RunUsingNormalLocalDbInstance is found, where the value is the name of a normal localDb instance to use.
@@ -106,45 +83,6 @@ namespace CSharpSqlTests
                 };
             }
 
-            //var localDbApi = new SqlLocalDbApi();
-            
-            //if (_runUsingTemporaryLocalDbInstance)
-            //{
-            //    _temporaryInstance = localDbApi.CreateTemporaryInstance();
-            //    _manager = _temporaryInstance.Manage();
-                
-            //    Log($"Temporary localDb instance created named {_temporaryInstance.Name}");
-
-            //    _instanceName = _temporaryInstance.Name;
-            //}
-            //else
-            //{
-            //    Log($"Using normal persistent localDb instance named {runUsingNormalLocalDbInstanceNamed}, if the database already exists in this instance it will be overwritten.");
-                
-            //    var normalInstance = localDbApi.GetOrCreateInstance(runUsingNormalLocalDbInstanceNamed);
-            //    _manager = normalInstance.Manage();
-
-            //    if (!normalInstance.IsRunning)
-            //    {
-            //        Log($"Starting localDb instance {_instanceName}");
-            //        _stopNormalInstanceAfterwards = true;
-            //        _manager.Start();
-            //    }
-
-            //    _instanceName = normalInstance.Name;
-            //}
-
-            // Open connection (to Master database)
-            SqlConnection = _context.GetNewSqlConnection();
-            SqlConnection.Open();
-            LogTiming($"Connection opened");
-
-            if(!_runUsingTemporaryLocalDbInstance)
-                DropDatabaseIfExists();
-
-            // do this every time?
-            _context.CreateNewDatabase(databaseName);
-            
             LogTiming("DbTestContext constructor completed");
         }
         
@@ -154,8 +92,8 @@ namespace CSharpSqlTests
             LogTiming("RunTest() method called");
             CloseDataReaderIfOpen();
 
-            SqlConnection.Close();
-            SqlConnection.Dispose();
+            SqlConnection?.Close();
+            SqlConnection?.Dispose();
             SqlConnection = _context.GetNewSqlConnection();
             SqlConnection.Open();
             SqlConnection.ChangeDatabase(_databaseName);
@@ -185,10 +123,10 @@ namespace CSharpSqlTests
         }
 
         /// <inheritdoc />
-        //public IDbConnection GetNewSqlConnection()
-        //{
-        //    return _manager.CreateConnection();
-        //}
+        public IDbConnection GetNewSqlConnection()
+        {
+            return _context.GetNewSqlConnection();
+        }
 
         /// <inheritdoc />
         public DbTestContext DeployDacpac(string dacpacProjectName = "", int maxSearchDepth = 4)
@@ -200,11 +138,15 @@ namespace CSharpSqlTests
 
             Log($"Deploying {dacPacInfo.DacPacPath}");
 
-            var svc = new DacServices(SqlConnection.ConnectionString);
+            SqlConnection?.Close();
+
+            var svc = new DacServices(_context.ConnectionString);
 
             var dacOptions = new DacDeployOptions
             {
-                CreateNewDatabase = true
+                CreateNewDatabase = true,
+                AllowIncompatiblePlatform = true,
+                
             };
 
             svc.Deploy(
@@ -225,27 +167,6 @@ namespace CSharpSqlTests
             LogTiming("Tearing down");
 
             _context.TearDown();
-
-            //if (_runUsingTemporaryLocalDbInstance)
-            //{
-            //    _manager.Stop();
-
-            //    LogTiming("Instance stopped");
-
-            //    var tempInstanceDir = new DirectoryInfo(_instancePath);
-
-            //    tempInstanceDir.Delete(true);
-
-            //    LogTiming("Instance directory deleted");
-            //}
-            //else
-            //{
-            //    if (_stopNormalInstanceAfterwards)
-            //    {
-            //        Log("Stopping localDb instance (because it wasn't running beforehand)");
-            //        _manager.Stop();
-            //    }
-            //}
 
             LogTiming($"Test run completed");
         }
@@ -283,9 +204,12 @@ namespace CSharpSqlTests
             throw new ApplicationException($"Found environment variable named CSharpSqlTests_Mode BUT value of {envMode} is not valid;\nValid values are 'ExistingDatabaseViaConnectionString' and 'ExistingLocalDbInstanceViaInstanceName'");
         }
 
-        private void DropDatabaseIfExists()
+        /// <inheritdoc />
+        public DbTestContext DropDatabaseIfExists()
         {
-            var dropDbCmd = SqlConnection.CreateCommand();
+            using var connection = _context.GetNewSqlConnection();
+            connection.Open();
+            var dropDbCmd = connection.CreateCommand();
             dropDbCmd.CommandText = @$"
 USE [master] 
 IF EXISTS(SELECT * FROM sys.databases WHERE name = '{_databaseName}')
@@ -295,19 +219,18 @@ BEGIN
 END";
             dropDbCmd.CommandType = CommandType.Text;
             dropDbCmd.ExecuteNonQuery();
+            connection.Close();
+
+            return this;
         }
 
-    //    private void CreateNewDatabase(string instancePath)
-    //    {
-    //        // Create temp database
-    //        var createDbCmd = SqlConnection.CreateCommand();
-    //        createDbCmd.CommandText = @$"CREATE DATABASE [{_databaseName}] ON  PRIMARY 
-    //( NAME = N'{_databaseName}_Data', FILENAME = N'{instancePath}\{_databaseName}.mdf' , SIZE = 10MB , MAXSIZE = 50MB, FILEGROWTH = 5MB )
-    // LOG ON 
-    //( NAME = N'{_databaseName}_Log', FILENAME = N'{instancePath}\{_databaseName}.ldf' , SIZE = 10MB , MAXSIZE = 50MB, FILEGROWTH = 5MB )";
-    //        createDbCmd.CommandType = CommandType.Text;
-    //        createDbCmd.ExecuteNonQuery();
-    //    }
+        /// <inheritdoc />
+        public DbTestContext CreateNewDatabase()
+        {
+            _context.CreateNewDatabase(_databaseName);
+
+            return this;
+        }
 
         private void LogTiming(string message)
         {

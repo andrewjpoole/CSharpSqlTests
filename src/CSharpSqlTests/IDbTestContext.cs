@@ -18,6 +18,8 @@ namespace CSharpSqlTests
     
         /// <summary>
         /// Deploys the latest built DacPac, please not this method does not trigger a build, if you have changes to the dacpac, please manually build them.
+        /// The deployment will create the database if it doesn't exist.
+        /// This method does not seem to work against sql running in containers.
         /// </summary>
         /// <param name="dacpacProjectName">Optional string which may contain the name of a DacPac project, if not supplied, the name of the database will be used.
         /// The surrounding directories which be searched for a DacPac project matching the name.
@@ -37,12 +39,19 @@ namespace CSharpSqlTests
         /// </summary>
         void TearDown();
         /// <summary>
-        /// A connection to the temporary localDb instance
+        /// A method which returns a new Connection to the temporary localDb instance
         /// </summary>
-        IDbConnection SqlConnection { get; }
+        /// <returns></returns>
+        IDbConnection GetNewSqlConnection();
+        /// <summary>
+        /// A connection to the temporary localDb instance, public so that extension methods of the Given, When and Then can access it.
+        /// Maybe null if called outside of a test, in which case use GetNewSqlConnection() instead.
+        /// </summary>
+        IDbConnection? SqlConnection { get; }
         /// <summary>
         /// An IdbTransaction property which will be assigned a new Transaction each time an individual test runs, 
         /// it will be rolled back after the test has run to ensure the tests cannot affect each other.
+        /// This is public so that extension methods of the Given, When and Then can access it.
         /// </summary>
         IDbTransaction? SqlTransaction { get; }
         /// <summary>
@@ -81,5 +90,15 @@ namespace CSharpSqlTests
         /// This Dictionary can be used to share state for a test between the Given, When and Then classes.
         /// </summary>
         Dictionary<string, object?> State { get; set; }
+        
+        /// <summary>
+        /// Method which drops the database with the name specified in the constructor, if it exists.
+        /// </summary>
+        DbTestContext DropDatabaseIfExists();
+        
+        /// <summary>
+        /// Method which creates a new database using the name specified in the constructor, the location of the files depends on the specified mode.
+        /// </summary>
+        DbTestContext CreateNewDatabase();
     }
 }

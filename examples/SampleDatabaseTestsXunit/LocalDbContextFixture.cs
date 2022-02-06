@@ -11,7 +11,7 @@ namespace SampleDatabaseTestsXunit
 
         public LocalDbContextFixture(IMessageSink sink)
         {
-            Context = new DbTestContext("SampleDb", DbTestContext.DbTestContextMode.TemporaryLocalDbInstance, log => sink.OnMessage(new DiagnosticMessage(log)));
+            Context = new DbTestContext("SampleDb", DbTestContextMode.TemporaryLocalDbInstance, log => sink.OnMessage(new DiagnosticMessage(log)));
             Context.DeployDacpac(maxSearchDepth:6);
         }       
 
