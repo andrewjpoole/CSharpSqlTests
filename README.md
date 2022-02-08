@@ -2,7 +2,7 @@
 
 A testing framework for sql related tests using a nice fluent C# api
 
-A temporary localDb instance will be spun up, a dacpac will optionally be deployed into it and then tests can be executed each within their own SqlTransaction.
+Target an existing sql instance, or an existing localDb, or have a temporary localDb instance spun up specially, optionally deploy a dacpac and then tests can be executed each within their own SqlTransaction.
 
 Given, When and Then helper classes are supplied:
 - Given: used to seed test data, remove FK constraints etc
@@ -22,7 +22,9 @@ Hopefully the following examples speak for themselves!
 [Fact]
 public void Connection_can_be_used_to_deploy_dacpac_and_run_stored_procedure_from_it()
 {
-    new LocalDbTestContext(DataBaseName, message => _testOutputHelper.WriteLine(message))
+    new DbTestContext(DatabaseName, 
+        DbTestContextMode.TemporaryLocalDbInstance, 
+        writeToOutput: message => _testOutputHelper.WriteLine(message))
         .DeployDacpac()
         .RunTest((connection, transaction) =>
         {
@@ -115,7 +117,10 @@ public class LocalDbContextFixture : IDisposable
 
     public LocalDbContextFixture(IMessageSink sink)
     {
-        Context = new LocalDbTestContext("SampleDb", log => sink.OnMessage(new DiagnosticMessage(log)));
+        Context = new DbTestContext(DatabaseName, 
+                    DbTestContextMode.ExistingDatabaseViaConnectionString, 
+                    existingDatabaseConnectionString: "Server=.\\SQLExpress; Integrated Security=true", 
+                    writeToOutput: message => _testOutputHelper.WriteLine(message));
         Context.DeployDacpac(); // If the DacPac name does not match the database name, pass the DacPac name in here, or an absolute path to the file.
     }       
 
@@ -125,12 +130,6 @@ public class LocalDbContextFixture : IDisposable
     }
 }
 ```
-
-## Using a normal localDb instance
-
-To use a normal persistent localDb instance (rather than a temporary one) provide a value for the optional string parameter `runUsingNormalLocalDbInstanceNamed` containing the name of the instance i.e. 'MSSQLLocalDB' or 'ProjectsV13'
-Or set an environment variable named "CSharpSqlTests_RunUsingNormalLocalDbInstance" containing the name of the instance.
-This is useful if you want to run tests in a CI build while using SqlCover for instance.
 
 This is mainly written to be an improvement in user friendliness over some of the t-SQL based test frameworks available
 

@@ -13,7 +13,7 @@ namespace CSharpSqlTests
     {
         private ISqlDatabaseContext _context;
         private readonly string _databaseName;
-        private readonly Action<string>? _logTiming;
+        private readonly Action<string>? _writeToOutput;
         private readonly DateTime _testRunStartedTime;
         private IDataReader? _dataReader;
         
@@ -52,18 +52,18 @@ namespace CSharpSqlTests
         /// </summary>
         /// <param name="databaseName">A string containing the name of the Database</param>
         /// <param name="mode">The mode, which specifies what db context should be used, options are ExistingDatabaseViaConnectionString, TemporaryLocalDbInstance or ExistingLocalDbInstanceViaInstanceName</param>
-        /// <param name="logTiming">An action to log messages.</param>
+        /// <param name="writeToOutput">An action to log messages.</param>
         /// <param name="existingLocalDbInstanceName">A string containing the name of a locabDb instance to use if mode is ExistingLocalDbInstanceViaInstanceName.</param>
         /// <param name="existingDatabaseConnectionString">A string containing the connection string to an existing db to use if mode is ExistingDatabaseViaConnectionString</param>
         public DbTestContext(
             string databaseName, 
             DbTestContextMode mode,
-            Action<string>? logTiming = null, 
             string existingDatabaseConnectionString = "",
-            string existingLocalDbInstanceName = "")
+            string existingLocalDbInstanceName = "",
+            Action<string>? writeToOutput = null)
         {
             _databaseName = databaseName;
-            _logTiming = logTiming;
+            _writeToOutput = writeToOutput;
             _testRunStartedTime = DateTime.Now;
 
             var (overridenLocalDbInstanceName, overridenConnectionString) = CheckForEnvironmentVariableModeOverride();
@@ -131,7 +131,7 @@ namespace CSharpSqlTests
         /// <inheritdoc />
         public DbTestContext DeployDacpac(string dacpacProjectName = "", int maxSearchDepth = 4)
         {
-            var dacPacInfo = new DacPacInfo(dacpacProjectName != string.Empty ? dacpacProjectName : _databaseName, maxSearchDepth, _logTiming);
+            var dacPacInfo = new DacPacInfo(dacpacProjectName != string.Empty ? dacpacProjectName : _databaseName, maxSearchDepth, _writeToOutput);
 
             if (!dacPacInfo.DacPacFound)
                 throw new Exception($"Cant deploy dacpac, no project found with name {dacpacProjectName}");
@@ -234,17 +234,17 @@ END";
 
         private void LogTiming(string message)
         {
-            if (_logTiming is null)
+            if (_writeToOutput is null)
                 return;
 
             var now = DateTime.Now;
             var elapsedTotal = now - _testRunStartedTime;
-            _logTiming($"{Math.Round(elapsedTotal.TotalSeconds, 2)}s {message}");
+            _writeToOutput($"{Math.Round(elapsedTotal.TotalSeconds, 2)}s {message}");
         }
 
         private void Log(string message)
         {
-            _logTiming?.Invoke($"{message}");
+            _writeToOutput?.Invoke($"{message}");
         }
     }
 }

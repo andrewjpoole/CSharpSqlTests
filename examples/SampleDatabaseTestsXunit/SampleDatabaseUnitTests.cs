@@ -19,7 +19,9 @@ namespace SampleDatabaseTestsXunit
         [Fact]
         public void Connection_can_be_used_to_deploy_dacpac_and_run_stored_procedure_against_temporary_localdb()
         {
-            new DbTestContext(DatabaseName, DbTestContextMode.TemporaryLocalDbInstance, message => _testOutputHelper.WriteLine(message))
+            new DbTestContext(DatabaseName, 
+                    DbTestContextMode.TemporaryLocalDbInstance,  
+                    writeToOutput: message => _testOutputHelper.WriteLine(message))
                 .DeployDacpac("SampleDb", maxSearchDepth:6)
                 .RunTest((connection, transaction) =>
                 {
@@ -44,7 +46,10 @@ namespace SampleDatabaseTestsXunit
         [Fact]
         public void Connection_can_be_used_to_deploy_dacpac_and_run_stored_procedure_against_existing_localdb()
         {
-            new DbTestContext(DatabaseName, DbTestContextMode.ExistingLocalDbInstanceViaInstanceName, message => _testOutputHelper.WriteLine(message), existingLocalDbInstanceName:"MSSQLLocalDB")
+            new DbTestContext(DatabaseName, 
+                    DbTestContextMode.ExistingLocalDbInstanceViaInstanceName, 
+                    existingLocalDbInstanceName: "MSSQLLocalDB", 
+                    writeToOutput: message => _testOutputHelper.WriteLine(message))
                 .DropDatabaseIfExists()
                 .DeployDacpac("SampleDb", maxSearchDepth: 6)
                 .RunTest((connection, transaction) =>
@@ -70,7 +75,10 @@ namespace SampleDatabaseTestsXunit
         [Fact]
         public void Connection_can_be_used_to_deploy_dacpac_and_run_stored_procedure_against_sqlexpress()
         {
-            new DbTestContext(DatabaseName, DbTestContextMode.ExistingDatabaseViaConnectionString, message => _testOutputHelper.WriteLine(message), existingDatabaseConnectionString: "Server=.\\SQLExpress; Integrated Security=true")
+            new DbTestContext(DatabaseName, 
+                    DbTestContextMode.ExistingDatabaseViaConnectionString, 
+                    existingDatabaseConnectionString: "Server=.\\SQLExpress; Integrated Security=true", 
+                    writeToOutput: message => _testOutputHelper.WriteLine(message))
                 .DeployDacpac("SampleDb", maxSearchDepth: 6)
                 .RunTest((connection, transaction) =>
                 {
