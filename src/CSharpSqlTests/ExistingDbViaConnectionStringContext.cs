@@ -16,7 +16,7 @@ namespace CSharpSqlTests
 
         public IDbConnection GetNewSqlConnection()
         {
-            return new System.Data.SqlClient.SqlConnection(_connectionString);
+            return new Microsoft.Data.SqlClient.SqlConnection(_connectionString);
         }
 
         public void TearDown()
