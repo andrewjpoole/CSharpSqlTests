@@ -77,7 +77,7 @@ namespace SampleDatabaseTestsXunit
         {
             new DbTestContext(DatabaseName, 
                     DbTestContextMode.ExistingDatabaseViaConnectionString, 
-                    existingDatabaseConnectionString: "Server=.\\SQLExpress; Integrated Security=true", 
+                    existingDatabaseConnectionString: @"Server=.\SQLExpress; Integrated Security=true; TrustServerCertificate=True;", 
                     writeToOutput: message => _testOutputHelper.WriteLine(message))
                 .DeployDacpac("SampleDb", maxSearchDepth: 6)
                 .RunTest((connection, transaction) =>
