@@ -15,7 +15,13 @@ namespace CSharpSqlTests
         /// A new Transaction is created for the test and will be rolled back afterwards to ensure the tests cannot affect each other.
         /// </summary>
         DbTestContext RunTest(Action<IDbConnection, IDbTransaction> useConnection);
-    
+
+        /// <summary>
+        /// A method which runs the specified Action, passing the Connection, the Action should contain the code which performs the test.
+        /// No Transactions are used, so you can test repository code which creates its own transactions. You will need to tear down any data yourself to ensure the tests cannot affect each other.
+        /// </summary>
+        DbTestContext RunTest(Action<IDbConnection> useConnection);
+
         /// <summary>
         /// Deploys the latest built DacPac, please not this method does not trigger a build, if you have changes to the dacpac, please manually build them.
         /// The deployment will create the database if it doesn't exist.
@@ -39,10 +45,15 @@ namespace CSharpSqlTests
         /// </summary>
         void TearDown();
         /// <summary>
-        /// A method which returns a new Connection to the temporary localDb instance
+        /// A method which returns a new Connection, note this will be connected to the Master database, connection.ChangeDatabase("databaseName") will need to be called.
         /// </summary>
         /// <returns></returns>
         IDbConnection GetNewSqlConnection();
+        /// <summary>
+        /// Closes and reopens the main db connection and changes to a database named directly here or the one specified in the constructor.
+        /// </summary>
+        /// <param name="namedDatabase">The name of the database to connect to</param>
+        void OpenConnectionAndChangeToNamedDatabase(string? namedDatabase = null);
         /// <summary>
         /// A connection to the temporary localDb instance, public so that extension methods of the Given, When and Then can access it.
         /// Maybe null if called outside of a test, in which case use GetNewSqlConnection() instead.

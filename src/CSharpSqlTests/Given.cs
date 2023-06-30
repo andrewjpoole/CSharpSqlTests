@@ -78,12 +78,22 @@ namespace CSharpSqlTests
 
         /// <summary>
         /// A method which removes a Foreign Key constraint, for instance so you don't have to setup data that you are not immediately testing.
+        /// Note, if used with the overload of RunTest() that does not use a transaction, you would have to manually re-add any removed constraints rtedy for subsequent tests.
         /// </summary>
         /// <param name="tableName">A string containing the name of the table.</param>
         /// <param name="fkConstraintName">A string containing the name of the FK to remove.</param>
         public Given TheForeignKeyConstraintIsRemoved(string tableName, string fkConstraintName)
         {
             return TheFollowingSqlStatementIsExecuted($"ALTER TABLE {tableName} DROP CONSTRAINT {fkConstraintName};");
+        }
+
+        /// <summary>
+        /// A method which removes all data from a table, for tearing down data from previous tests, particularly if using the version of RunTest that does not use a transaction.
+        /// </summary>
+        /// <param name="tableName">A string containing the name of the table.</param>
+        public Given AnyDataInTheTableIsRemoved(string tableName)
+        {
+            return TheFollowingSqlStatementIsExecuted($"DELETE FROM {tableName};");
         }
 
         /// <summary>

@@ -92,11 +92,7 @@ namespace CSharpSqlTests
             LogTiming("RunTest() method called");
             CloseDataReaderIfOpen();
 
-            SqlConnection?.Close();
-            SqlConnection?.Dispose();
-            SqlConnection = _context.GetNewSqlConnection();
-            SqlConnection.Open();
-            SqlConnection.ChangeDatabase(_databaseName);
+            OpenConnectionAndChangeToNamedDatabase();
 
             try
             {
@@ -113,6 +109,38 @@ namespace CSharpSqlTests
             }
 
             return this;
+        }
+
+        /// <inheritdoc />
+        public DbTestContext RunTest(Action<IDbConnection> useConnection)
+        {
+            LogTiming("RunTest() method called");
+            CloseDataReaderIfOpen();
+
+            OpenConnectionAndChangeToNamedDatabase();
+
+            try
+            {
+                useConnection(SqlConnection);
+            }
+            finally
+            {
+                CloseDataReaderIfOpen();
+                SqlConnection.Close();
+                SqlConnection.Dispose();
+            }
+
+            return this;
+        }
+
+        /// <inheritdoc />
+        public void OpenConnectionAndChangeToNamedDatabase(string? namedDatabase = null)
+        {
+            SqlConnection?.Close();
+            SqlConnection?.Dispose();
+            SqlConnection = _context.GetNewSqlConnection();
+            SqlConnection.Open();
+            SqlConnection.ChangeDatabase(namedDatabase ?? _databaseName);
         }
 
         /// <inheritdoc />

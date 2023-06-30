@@ -107,6 +107,24 @@ namespace CSharpSqlTests.FrameworkTests
         }
 
         [Fact]
+        public void AnyDataIsTheTableIsRemoved_calls_ExecuteNonQueryc_on_cmd()
+        {
+            var mockContext = new Mock<IDbTestContext>();
+            var mockConnection = new Mock<IDbConnection>();
+            var mockCommand = new Mock<IDbCommand>();
+
+            mockConnection.Setup(x => x.CreateCommand()).Returns(mockCommand.Object);
+            mockContext.Setup(x => x.SqlConnection).Returns(mockConnection.Object);
+
+            var sut = new Given(mockContext.Object);
+
+            sut.AnyDataInTheTableIsRemoved("tableBlah");
+
+            mockCommand.VerifySet(x => x.CommandText = "DELETE FROM tableBlah;", Times.Once);
+            mockCommand.Verify(x => x.ExecuteNonQuery(), Times.Once);
+        }
+
+        [Fact]
         public void And_just_returns_the_given()
         {
             var context = new Mock<IDbTestContext>();
