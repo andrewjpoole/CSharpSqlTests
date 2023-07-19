@@ -97,13 +97,13 @@ The `LocalDbTestContext` class's constructor is responsible for setting everythi
 
 For the DacPac deployment, I took inspiration from [this StackOverflow thread](https://stackoverflow.com/questions/43365451/improve-the-performance-of-dacpac-deployment-using-c-sharp). The framework contains a class named `DacPacInfo` which is passed a string either containing a path to a dacpac file or a dacpac file name. If passed a path it will just use that path, otherwise it will traverse up the solution directory structure to a configurable number of levels and then use the file name to search for matching dacpac files and use the first onenit finds, this second method obviously takes longer.
 
-## LocalDbTestContext RunTest method
+## DbTestContext RunTest method
 
 The `RunTest()` method unsuprisingly runs a test defined in the  `Action<IDbConnection, IDbTransaction>` passed into the method.
 
 A new connection is opened and a new `SqlTransaction` created which are passed to the Action. The Action is called within a `try finally` block, which is then used to tidy up any open `DataReader` objects on the connection and roll back the `SqlTransaction` after the test Action has been invoked, this ensures that each test starts with a clean slate unaffected by other tests.
 
-There is also an overload of the `RunTest()` method which not begin and roll back a transaction, this is useful for testing repository classes which usually like to creat a new connection, use it and dispose it soon afterwards.
+There is also an overload of the `RunTest()` method which not begin and roll back a transaction, this is useful for testing repository classes which usually like to creat a new connection, use it and dispose it soon afterwards. Please not you will have to manage and tidying up of test data to ensure tests do not interfere with each other as theres no transaction to be rolled back for you.
 
 ## Some nice extra features
 
