@@ -6,342 +6,341 @@ using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SampleDatabaseTestsXunit
+namespace SampleDatabaseTestsXunit;
+
+public class SampleDatabaseTestsUsingASingleContext : IClassFixture<LocalDbContextFixture>
 {
-    public class SampleDatabaseTestsUsingASingleContext : IClassFixture<LocalDbContextFixture>
+    private readonly ITestOutputHelper _testOutputHelper;
+    private readonly DbTestContext _context;
+
+    public SampleDatabaseTestsUsingASingleContext(ITestOutputHelper testOutputHelper, LocalDbContextFixture localDbContextFixture)
     {
-        private readonly ITestOutputHelper _testOutputHelper;
-        private readonly DbTestContext _context;
-
-        public SampleDatabaseTestsUsingASingleContext(ITestOutputHelper testOutputHelper, LocalDbContextFixture localDbContextFixture)
-        {
-            _testOutputHelper = testOutputHelper;
-            _context = localDbContextFixture.Context;
-        }
+        _testOutputHelper = testOutputHelper;
+        _context = localDbContextFixture.Context;
+    }
         
-        [Fact]
-        public void helper_classes_can_be_used_to_deploy_dacpac_and_run_stored_procedure_from_it()
+    [Fact]
+    public void helper_classes_can_be_used_to_deploy_dacpac_and_run_stored_procedure_from_it()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                Given.UsingThe(_context);
+            Given.UsingThe(_context);
 
-                When.UsingThe(_context)
-                    .TheStoredProcedureIsExecutedWithReturnParameter("spAddTwoNumbers", ("@param1", 5), ("@param2", 12));
+            When.UsingThe(_context)
+                .TheStoredProcedureIsExecutedWithReturnParameter("spAddTwoNumbers", ("@param1", 5), ("@param2", 12));
 
-                Then.UsingThe(_context)
-                    .TheNonReaderQueryResultShouldBe(17);
-            });
-        }
+            Then.UsingThe(_context)
+                .TheNonReaderQueryResultShouldBe(17);
+        });
+    }
 
-        [Fact]
-        public void helper_classes_can_be_used_to_insert_rows_from_markdown_table_and_query()
+    [Fact]
+    public void helper_classes_can_be_used_to_insert_rows_from_markdown_table_and_query()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                var tempData = @"
+            var tempData = @"
                 | Id | Name   | Address     |
                 | -- | ------ | ----------- |
                 | 1  | Andrew | emptyString |
                 | 2  | Jo     | null        |";
 
-                Given.UsingThe(_context)
-                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
+            Given.UsingThe(_context)
+                .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
-                When.UsingThe(_context)
-                    .TheReaderQueryIsExecuted("SELECT * FROM Customers");
+            When.UsingThe(_context)
+                .TheReaderQueryIsExecuted("SELECT * FROM Customers");
 
-                Then.UsingThe(_context)
-                    .TheReaderQueryResultsShouldBe(tempData);
+            Then.UsingThe(_context)
+                .TheReaderQueryResultsShouldBe(tempData);
 
-            });
-        }
+        });
+    }
 
-        [Fact]
-        public void test_dropping_fk_constring_reduce_seeding_requirements() 
+    [Fact]
+    public void test_dropping_fk_constring_reduce_seeding_requirements() 
+    {
+        _context.RunTest((connection, transaction) => 
         {
-            _context.RunTest((connection, transaction) => 
-            {
-                var expectedOrder = @"
+            var expectedOrder = @"
                     | Id | Customers_Id | DateCreated | DateFulfilled  | DatePaid | ProductName | Quantity | QuotedPrice | Notes       |
                     | -- | ------------ | ----------- | -------------- | -------- | ----------- | -------- | ----------- | ----------- |
                     | 23 | 1            | 2021/07/21  | 2021/08/02     | null     | Apples      | 21       | 5.29        | emptyString |";
 
-                Given.UsingThe(_context)
-                    .TheFollowingSqlStatementIsExecuted("ALTER TABLE Orders DROP CONSTRAINT FK_Orders_Customers;")
-                    .And.TheFollowingDataExistsInTheTable("Orders", expectedOrder);
+            Given.UsingThe(_context)
+                .TheFollowingSqlStatementIsExecuted("ALTER TABLE Orders DROP CONSTRAINT FK_Orders_Customers;")
+                .And.TheFollowingDataExistsInTheTable("Orders", expectedOrder);
 
-                When.UsingThe(_context)
-                    .TheStoredProcedureIsExecutedWithReader("spFetchOrderById", ("OrderId", 23));
+            When.UsingThe(_context)
+                .TheStoredProcedureIsExecutedWithReader("spFetchOrderById", ("OrderId", 23));
 
-                Then.UsingThe(_context)
-                    .TheReaderQueryResultsShouldBe(expectedOrder);
+            Then.UsingThe(_context)
+                .TheReaderQueryResultsShouldBe(expectedOrder);
 
-            });
-        }
+        });
+    }
 
-        [Fact]
-        public void test_asserting_using_contains()
+    [Fact]
+    public void test_asserting_using_contains()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                var order = @"
+            var order = @"
                     | Id | Customers_Id | DateCreated | DateFulfilled  | DatePaid | ProductName | Quantity | QuotedPrice | Notes       |
                     | -- | ------------ | ----------- | -------------- | -------- | ----------- | -------- | ----------- | ----------- |
                     | 23 | 1            | 2021/07/21  | 2021/08/02     | null     | Apples      | 21       | 5.29        | emptyString |";
 
-                Given.UsingThe(_context)
-                    .TheFollowingSqlStatementIsExecuted("ALTER TABLE Orders DROP CONSTRAINT FK_Orders_Customers;")
-                    .And.TheFollowingDataExistsInTheTable("Orders", order);
+            Given.UsingThe(_context)
+                .TheFollowingSqlStatementIsExecuted("ALTER TABLE Orders DROP CONSTRAINT FK_Orders_Customers;")
+                .And.TheFollowingDataExistsInTheTable("Orders", order);
 
-                When.UsingThe(_context)
-                    .TheStoredProcedureIsExecutedWithReader("spFetchOrderById", ("OrderId", 23));
+            When.UsingThe(_context)
+                .TheStoredProcedureIsExecutedWithReader("spFetchOrderById", ("OrderId", 23));
 
-                Then.UsingThe(_context)
-                    .TheReaderQueryResultsShouldContain(@"| Id |
+            Then.UsingThe(_context)
+                .TheReaderQueryResultsShouldContain(@"| Id |
                                                           | -- |
                                                           | 23 |");
 
-            });
-        }
+        });
+    }
 
-        [Fact]
-        public void tabular_data_can_be_specified_using_fluent_api()
+    [Fact]
+    public void tabular_data_can_be_specified_using_fluent_api()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                var tempData = TabularData
-                    .CreateWithColumns("Id", "Name", "Address")
-                    .AddRowWithValues(1, "Andrew", "emptyString")
-                    .AddRowWithValues(2, "Jo", "null");
+            var tempData = TabularData
+                .CreateWithColumns("Id", "Name", "Address")
+                .AddRowWithValues(1, "Andrew", "emptyString")
+                .AddRowWithValues(2, "Jo", "null");
 
-                Given.UsingThe(_context)
-                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
+            Given.UsingThe(_context)
+                .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
-                When.UsingThe(_context)
-                    .TheReaderQueryIsExecuted("SELECT * FROM Customers");
+            When.UsingThe(_context)
+                .TheReaderQueryIsExecuted("SELECT * FROM Customers");
 
-                Then.UsingThe(_context)
-                    .TheReaderQueryResultsShouldBe(tempData);
+            Then.UsingThe(_context)
+                .TheReaderQueryResultsShouldBe(tempData);
 
-            });
-        }
+        });
+    }
 
-        [Fact]
-        public void scalar_queries_can_be_used_for_assertion()
+    [Fact]
+    public void scalar_queries_can_be_used_for_assertion()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                var tempData = TabularData
-                    .CreateWithColumns("Id", "Name", "Address")
-                    .AddRowWithValues(1, "Andrew", "emptyString")
-                    .AddRowWithValues(2, "Jo", "null");
+            var tempData = TabularData
+                .CreateWithColumns("Id", "Name", "Address")
+                .AddRowWithValues(1, "Andrew", "emptyString")
+                .AddRowWithValues(2, "Jo", "null");
 
-                Given.UsingThe(_context)
-                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
+            Given.UsingThe(_context)
+                .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
-                When.UsingThe(_context)
-                    .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
+            When.UsingThe(_context)
+                .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
 
-                Then.UsingThe(_context)
-                    .TheScalarQueryIsExecuted("SELECT COUNT(*) FROM Customers", result => (int)result! == 1);
+            Then.UsingThe(_context)
+                .TheScalarQueryIsExecuted("SELECT COUNT(*) FROM Customers", result => (int)result! == 1);
 
-            });
-        }
+        });
+    }
 
-        [Fact]
-        public void scalar_queries_can_be_used_for_assertion_using_out_var()
+    [Fact]
+    public void scalar_queries_can_be_used_for_assertion_using_out_var()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                var tempData = TabularData
-                    .CreateWithColumns("Id", "Name", "Address")
-                    .AddRowWithValues(1, "Andrew", "emptyString")
-                    .AddRowWithValues(2, "Jo", "null");
+            var tempData = TabularData
+                .CreateWithColumns("Id", "Name", "Address")
+                .AddRowWithValues(1, "Andrew", "emptyString")
+                .AddRowWithValues(2, "Jo", "null");
 
-                Given.UsingThe(_context)
-                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
+            Given.UsingThe(_context)
+                .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
-                When.UsingThe(_context)
-                    .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
+            When.UsingThe(_context)
+                .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
 
-                Then.UsingThe(_context)
-                    .TheScalarQueryIsExecuted("SELECT COUNT(*) FROM Customers", out var numberOfCustomers);
+            Then.UsingThe(_context)
+                .TheScalarQueryIsExecuted("SELECT COUNT(*) FROM Customers", out var numberOfCustomers);
 
-                numberOfCustomers.Should().Be(1);
+            numberOfCustomers.Should().Be(1);
 
-            });
-        }
+        });
+    }
 
-        [Fact]
-        public void reader_queries_can_be_used_for_assertion()
+    [Fact]
+    public void reader_queries_can_be_used_for_assertion()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                var tempData = TabularData
-                    .CreateWithColumns("Id", "Name", "Address")
-                    .AddRowWithValues(1, "Andrew", "emptyString")
-                    .AddRowWithValues(2, "Jo", "null");
+            var tempData = TabularData
+                .CreateWithColumns("Id", "Name", "Address")
+                .AddRowWithValues(1, "Andrew", "emptyString")
+                .AddRowWithValues(2, "Jo", "null");
 
-                Given.UsingThe(_context)
-                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
+            Given.UsingThe(_context)
+                .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
-                When.UsingThe(_context)
-                    .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
+            When.UsingThe(_context)
+                .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
 
-                Then.UsingThe(_context)
-                    .TheReaderQueryIsExecuted("SELECT * FROM Customers", result => 
-                        result.Contains(TabularData.CreateWithColumns("Id").AddRowWithValues(2), out _));
+            Then.UsingThe(_context)
+                .TheReaderQueryIsExecuted("SELECT * FROM Customers", result => 
+                    result.Contains(TabularData.CreateWithColumns("Id").AddRowWithValues(2), out _));
 
-            });
-        }
+        });
+    }
 
-        [Fact]
-        public void reader_queries_can_be_used_for_assertion_using_out_var()
+    [Fact]
+    public void reader_queries_can_be_used_for_assertion_using_out_var()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                var tempData = TabularData
-                    .CreateWithColumns("Id", "Name", "Address")
-                    .AddRowWithValues(1, "Andrew", "emptyString")
-                    .AddRowWithValues(2, "Jo", "null");
+            var tempData = TabularData
+                .CreateWithColumns("Id", "Name", "Address")
+                .AddRowWithValues(1, "Andrew", "emptyString")
+                .AddRowWithValues(2, "Jo", "null");
 
-                Given.UsingThe(_context)
-                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
+            Given.UsingThe(_context)
+                .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
-                When.UsingThe(_context)
-                    .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
+            When.UsingThe(_context)
+                .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
 
-                Then.UsingThe(_context)
-                    .TheReaderQueryIsExecuted("SELECT * FROM Customers", out var result);
+            Then.UsingThe(_context)
+                .TheReaderQueryIsExecuted("SELECT * FROM Customers", out var result);
 
-                result.Rows.Count.Should().Be(1);
-                result.Rows.First()["Id"].Should().Be(2);
+            result.Rows.Count.Should().Be(1);
+            result.Rows.First()["Id"].Should().Be(2);
 
-            });
-        }
+        });
+    }
         
-        [Fact]
-        public void reader_queries_can_be_used_for_assertion_using_TheReaderQueryIsExecutedAndIsEqualTo()
+    [Fact]
+    public void reader_queries_can_be_used_for_assertion_using_TheReaderQueryIsExecutedAndIsEqualTo()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                var tempData = TabularData
-                    .CreateWithColumns("Id", "Name", "Address")
-                    .AddRowWithValues(1, "Andrew", "emptyString")
-                    .AddRowWithValues(2, "Jo", "null");
+            var tempData = TabularData
+                .CreateWithColumns("Id", "Name", "Address")
+                .AddRowWithValues(1, "Andrew", "emptyString")
+                .AddRowWithValues(2, "Jo", "null");
 
-                Given.UsingThe(_context)
-                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
+            Given.UsingThe(_context)
+                .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
-                When.UsingThe(_context)
-                    .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
+            When.UsingThe(_context)
+                .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
 
-                Then.UsingThe(_context)
-                    .TheReaderQueryIsExecutedAndIsEqualTo("SELECT * FROM Customers", TabularData.CreateWithColumns("Id", "Name", "Address").AddRowWithValues(2, "Jo", "null").ToMarkdownTableString());
+            Then.UsingThe(_context)
+                .TheReaderQueryIsExecutedAndIsEqualTo("SELECT * FROM Customers", TabularData.CreateWithColumns("Id", "Name", "Address").AddRowWithValues(2, "Jo", "null").ToMarkdownTableString());
 
-            });
-        }
+        });
+    }
 
-        [Fact]
-        public void reader_queries_can_be_used_for_assertion_using_TheReaderQueryIsExecutedAndContains()
+    [Fact]
+    public void reader_queries_can_be_used_for_assertion_using_TheReaderQueryIsExecutedAndContains()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                var tempData = TabularData
-                    .CreateWithColumns("Id", "Name", "Address")
-                    .AddRowWithValues(1, "Andrew", "emptyString")
-                    .AddRowWithValues(2, "Jo", "null");
+            var tempData = TabularData
+                .CreateWithColumns("Id", "Name", "Address")
+                .AddRowWithValues(1, "Andrew", "emptyString")
+                .AddRowWithValues(2, "Jo", "null");
 
-                Given.UsingThe(_context)
-                    .And.TheFollowingDataExistsInTheTable("Customers", tempData);
+            Given.UsingThe(_context)
+                .And.TheFollowingDataExistsInTheTable("Customers", tempData);
 
-                When.UsingThe(_context)
-                    .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
+            When.UsingThe(_context)
+                .TheScalarQueryIsExecuted("DELETE FROM Customers WHERE Id = 1");
 
-                Then.UsingThe(_context)
-                    .TheReaderQueryIsExecutedAndContains("SELECT * FROM Customers", TabularData.CreateWithColumns("Id", "Name").AddRowWithValues(2, "Jo").ToMarkdownTableString());
+            Then.UsingThe(_context)
+                .TheReaderQueryIsExecutedAndContains("SELECT * FROM Customers", TabularData.CreateWithColumns("Id", "Name").AddRowWithValues(2, "Jo").ToMarkdownTableString());
 
-            });
-        }
+        });
+    }
 
-        [Fact]
-        public void contains_works_with_Guids()
+    [Fact]
+    public void contains_works_with_Guids()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                var id1 = Guid.NewGuid();
-                var id2 = Guid.NewGuid();
+            var id1 = Guid.NewGuid();
+            var id2 = Guid.NewGuid();
 
-                var tempData = TabularData
-                    .CreateWithColumns("Id", "Name", "Address")
-                    .AddRowWithValues(id1, "Andrew", "emptyString")
-                    .AddRowWithValues(id2, "Jo", "null");
+            var tempData = TabularData
+                .CreateWithColumns("Id", "Name", "Address")
+                .AddRowWithValues(id1, "Andrew", "emptyString")
+                .AddRowWithValues(id2, "Jo", "null");
 
-                Given.UsingThe(_context)
-                    .And.TheFollowingDataExistsInTheTable("Accounts", tempData);
+            Given.UsingThe(_context)
+                .And.TheFollowingDataExistsInTheTable("Accounts", tempData);
 
-                When.UsingThe(_context)
-                    .TheReaderQueryIsExecuted("SELECT * FROM Accounts");
+            When.UsingThe(_context)
+                .TheReaderQueryIsExecuted("SELECT * FROM Accounts");
 
-                Then.UsingThe(_context)
-                    .TheReaderQueryResultsShouldContain(TabularData.CreateWithColumns("Id").AddRowWithValues(id1));
+            Then.UsingThe(_context)
+                .TheReaderQueryResultsShouldContain(TabularData.CreateWithColumns("Id").AddRowWithValues(id1));
 
-            });
-        }
+        });
+    }
 
-        [Fact]
-        public void contains_works_with_Guids_parsed_from_strings()
+    [Fact]
+    public void contains_works_with_Guids_parsed_from_strings()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                var id1 = Guid.NewGuid();
-                var id2 = Guid.NewGuid();
+            var id1 = Guid.NewGuid();
+            var id2 = Guid.NewGuid();
 
-                var tempData = TabularData
-                    .CreateWithColumns("Id", "Name", "Address")
-                    .AddRowWithValues(id1, "Andrew", "emptyString")
-                    .AddRowWithValues(id2, "Jo", "null");
+            var tempData = TabularData
+                .CreateWithColumns("Id", "Name", "Address")
+                .AddRowWithValues(id1, "Andrew", "emptyString")
+                .AddRowWithValues(id2, "Jo", "null");
 
-                Given.UsingThe(_context)
-                    .And.TheFollowingDataExistsInTheTable("Accounts", tempData);
+            Given.UsingThe(_context)
+                .And.TheFollowingDataExistsInTheTable("Accounts", tempData);
 
-                When.UsingThe(_context)
-                    .TheReaderQueryIsExecuted("SELECT * FROM Accounts");
+            When.UsingThe(_context)
+                .TheReaderQueryIsExecuted("SELECT * FROM Accounts");
 
-                Then.UsingThe(_context)
-                    .TheReaderQueryResultsShouldContain(@$"| Id    | Name   |
+            Then.UsingThe(_context)
+                .TheReaderQueryResultsShouldContain(@$"| Id    | Name   |
                                                            | ----- | ------ |
                                                            | {id1} | Andrew |"); // the guid ends up as a string in the TabularData rather than a Guid type
 
-            });
-        }
+        });
+    }
 
-        [Fact]
-        public void dates_are_returned_as_expected()
+    [Fact]
+    public void dates_are_returned_as_expected()
+    {
+        _context.RunTest((connection, transaction) =>
         {
-            _context.RunTest((connection, transaction) =>
-            {
-                var id1 = Guid.NewGuid();
-                var id2 = Guid.NewGuid();
+            var id1 = Guid.NewGuid();
+            var id2 = Guid.NewGuid();
 
-                var tempData = TabularData
-                    .CreateWithColumns("Id", "Name", "DateJoined")
-                    .AddRowWithValues(id1, "Andrew", DateTime.Today)
-                    .AddRowWithValues(id2, "Jo", DateTime.Today.AddDays(-2));
+            var tempData = TabularData
+                .CreateWithColumns("Id", "Name", "DateJoined")
+                .AddRowWithValues(id1, "Andrew", DateTime.Today)
+                .AddRowWithValues(id2, "Jo", DateTime.Today.AddDays(-2));
 
-                Given.UsingThe(_context)
-                    .And.TheFollowingDataExistsInTheTable("Accounts", tempData);
+            Given.UsingThe(_context)
+                .And.TheFollowingDataExistsInTheTable("Accounts", tempData);
 
-                When.UsingThe(_context)
-                    .TheReaderQueryIsExecuted("SELECT * FROM Accounts");
+            When.UsingThe(_context)
+                .TheReaderQueryIsExecuted("SELECT * FROM Accounts");
 
-                Then.UsingThe(_context)
-                    .TheReaderQueryResultsShouldContain(@$"| Id    | DateJoined       |
+            Then.UsingThe(_context)
+                .TheReaderQueryResultsShouldContain(@$"| Id    | DateJoined       |
                                                            | ----- | ---------------- |
                                                            | {id1} | {DateTime.Today} |"); // the guid ends up as a string in the TabularData rather than a Guid type
 
-            });
-        }
+        });
     }
 }

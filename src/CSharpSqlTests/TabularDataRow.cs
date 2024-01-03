@@ -1,22 +1,21 @@
 ﻿using System.Collections.Generic;
 
-namespace CSharpSqlTests
+namespace CSharpSqlTests;
+
+public class TabularDataRow
 {
-    public class TabularDataRow
-    {
-        public TabularData Parent { get; }
+    public TabularData Parent { get; }
         
-        public Dictionary<string, object?> ColumnValues = new();
+    public Dictionary<string, object?> ColumnValues = new();
 
-        public TabularDataRow(TabularData parent)
-        {
-            Parent = parent;
-        }
+    public TabularDataRow(TabularData parent)
+    {
+        Parent = parent;
+    }
 
-        public object? this[string columnName]
-        {
-            get => ColumnValues[columnName];
-            set => ColumnValues[columnName] = value;
-        }
+    public object? this[string columnName]
+    {
+        get => ColumnValues[columnName];
+        set => ColumnValues[columnName] = value;
     }
 }

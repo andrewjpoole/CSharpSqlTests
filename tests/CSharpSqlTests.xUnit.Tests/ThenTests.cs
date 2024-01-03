@@ -1,20 +1,19 @@
 using Moq;
 using Xunit;
 
-namespace CSharpSqlTests.xUnit.Tests
+namespace CSharpSqlTests.xUnit.Tests;
+
+public class ThenTests
 {
-    public class ThenTests
+    [Fact]
+    public void TheNonReaderQueryResultShouldBe_compares_LastQueryResult_with_parameter()
     {
-        [Fact]
-        public void TheNonReaderQueryResultShouldBe_compares_LastQueryResult_with_parameter()
-        {
-            var mockContext = new Mock<IDbTestContext>();
+        var mockContext = new Mock<IDbTestContext>();
 
-            mockContext.Setup(x => x.LastNonReaderQueryResult).Returns(23);
+        mockContext.Setup(x => x.LastNonReaderQueryResult).Returns(23);
 
-            var sut = new Then(mockContext.Object);
+        var sut = new Then(mockContext.Object);
 
-            sut.TheNonReaderQueryResultShouldBe(23);
-        }
+        sut.TheNonReaderQueryResultShouldBe(23);
     }
 }

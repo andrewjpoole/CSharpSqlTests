@@ -2,25 +2,24 @@ using CSharpSqlTests.NUnit;
 using Moq;
 using NUnit.Framework;
 
-namespace CSharpSqlTests.NUit.Tests
+namespace CSharpSqlTests.NUit.Tests;
+
+public class ThenTests
 {
-    public class ThenTests
+    [SetUp]
+    public void Setup()
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
+    }
 
-        [Test]
-        public void Test1()
-        {
-            var mockContext = new Mock<IDbTestContext>();
+    [Test]
+    public void Test1()
+    {
+        var mockContext = new Mock<IDbTestContext>();
 
-            mockContext.Setup(x => x.LastNonReaderQueryResult).Returns(23);
+        mockContext.Setup(x => x.LastNonReaderQueryResult).Returns(23);
 
-            var sut = new Then(mockContext.Object);
+        var sut = new Then(mockContext.Object);
 
-            sut.TheNonReaderQueryResultShouldBe(23);
-        }
+        sut.TheNonReaderQueryResultShouldBe(23);
     }
 }

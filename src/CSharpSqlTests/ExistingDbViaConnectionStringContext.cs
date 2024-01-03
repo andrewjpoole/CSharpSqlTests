@@ -1,37 +1,36 @@
 ﻿using System.Data;
 #pragma warning disable CS1591
 
-namespace CSharpSqlTests
+namespace CSharpSqlTests;
+
+public class ExistingDbViaConnectionStringContext : ISqlDatabaseContext
 {
-    public class ExistingDbViaConnectionStringContext : ISqlDatabaseContext
+    private readonly string _connectionString;
+
+    public string ConnectionString => _connectionString;
+
+    public ExistingDbViaConnectionStringContext(string connectionString)
     {
-        private readonly string _connectionString;
+        _connectionString = connectionString;
+    }
 
-        public string ConnectionString => _connectionString;
+    public IDbConnection GetNewSqlConnection()
+    {
+        return new Microsoft.Data.SqlClient.SqlConnection(_connectionString);
+    }
 
-        public ExistingDbViaConnectionStringContext(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
+    public void TearDown()
+    {
+    }
 
-        public IDbConnection GetNewSqlConnection()
-        {
-            return new Microsoft.Data.SqlClient.SqlConnection(_connectionString);
-        }
-
-        public void TearDown()
-        {
-        }
-
-        public void CreateNewDatabase(string databaseName)
-        {
-            using var connection = GetNewSqlConnection();
-            connection.Open();
-            var createDbCmd = connection.CreateCommand();
-            createDbCmd.CommandText = @$"CREATE DATABASE [{databaseName}]";
-            createDbCmd.CommandType = CommandType.Text;
-            createDbCmd.ExecuteNonQuery();
-            connection.Close();
-        }
+    public void CreateNewDatabase(string databaseName)
+    {
+        using var connection = GetNewSqlConnection();
+        connection.Open();
+        var createDbCmd = connection.CreateCommand();
+        createDbCmd.CommandText = @$"CREATE DATABASE [{databaseName}]";
+        createDbCmd.CommandType = CommandType.Text;
+        createDbCmd.ExecuteNonQuery();
+        connection.Close();
     }
 }
