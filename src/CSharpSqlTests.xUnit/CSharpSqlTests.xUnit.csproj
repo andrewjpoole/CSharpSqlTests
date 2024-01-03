@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
 	  <TargetFramework>netstandard2.0</TargetFramework>
@@ -12,20 +12,21 @@
 	  <RepositoryUrl>https://github.com/andrewjpoole/CSharpSqlTests</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
 	  <PackageTags>sql testing; stored procedure testing; dacpac testing;</PackageTags>
-	  <Version>1.7.5</Version>
+	  <Version>1.7.6</Version>
 	  <PackageReleaseNotes>
-		  1.7.5) Added OpenConnectionAndChangeToNamedDatabase() method, in case a repository layer disposes of the connection with a 'using'
-		  1.7.4) Added version of RunTest() which doesn't use a transaction and Given.AnyDataInTheTableIsRemoved()
-		  1.7.3) Upgraded packages and switched to Microsoft.Data.SqlClient
-		  1.7.2) Re-ordered DbTestContext constructor arguments
-		  1.7.1) ExistingDbViaConnectionStringContext.CreateConnection now returns a Microsoft.Data.SqlClient SqlConnection
-		  1.7.0) Added support for targetting standalone sql instances via connection string.
-		  1.6.1) When using normal persistent localDb instance, only stop afterwards if it wasn't already started.
-		  1.6.0) Added support for running in an ordinary persistent localDb instance i.e. for SqlCover etc, also some internal improvements around use of IDataReader and some tidying up.
-		  Bumping the version and release notes to reflect the latest version of the core package, will be kept in sync from now on.
-		  1.1.0) Using 1.5.0 of CSharpSqlTests package
-		  1.0.0) initial version
-	  </PackageReleaseNotes>
+		  1.7.6) Added an addition comparison option to TabularData Contains method and exposed the ConnectionString property through the test context.
+			1.7.5) Added OpenConnectionAndChangeToNamedDatabase() method, in case a repository layer disposes of the connection with a 'using'
+			1.7.4) Added version of RunTest() which doesn't use a transaction and Given.AnyDataInTheTableIsRemoved()
+			1.7.3) Upgraded packages and switched to Microsoft.Data.SqlClient
+			1.7.2) Re-ordered DbTestContext constructor arguments
+			1.7.1) ExistingDbViaConnectionStringContext.CreateConnection now returns a Microsoft.Data.SqlClient SqlConnection
+			1.7.0) Added support for targetting standalone sql instances via connection string.
+			1.6.1) When using normal persistent localDb instance, only stop afterwards if it wasn't already started.
+			1.6.0) Added support for running in an ordinary persistent localDb instance i.e. for SqlCover etc, also some internal improvements around use of IDataReader and some tidying up.
+			Bumping the version and release notes to reflect the latest version of the core package, will be kept in sync from now on.
+			1.1.0) Using 1.5.0 of CSharpSqlTests package
+			1.0.0) initial version
+		</PackageReleaseNotes>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	  <IncludeSymbols>true</IncludeSymbols>
@@ -41,7 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="xunit.assert" Version="2.4.2" />
+    <PackageReference Include="xunit.assert" Version="2.6.4" />
   </ItemGroup>
 
   <ItemGroup>
