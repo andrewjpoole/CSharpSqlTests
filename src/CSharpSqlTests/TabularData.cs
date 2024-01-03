@@ -381,8 +381,9 @@ namespace CSharpSqlTests
         /// Return true if this TabularData contains at least the columns and rows in the supplied comparisonData, also return a list of any missing data
         /// i.e. this TabularData can contain more columns and/or rows, but we are only checking against the columns and rows in comparisonData.
         /// If you want an exact match use Equals() instead.
+        /// To compare values after calling ToString(), set the allowToStringComparison flag e.g. Guid 23abf6... will match "23abf6..."
         /// </summary>
-        public bool Contains(TabularData comparisonData, out List<string> differences)
+        public bool Contains(TabularData comparisonData, out List<string> differences, bool allowToStringComparison = false)
         {
             differences = new List<string>();
             
@@ -410,10 +411,12 @@ namespace CSharpSqlTests
                     for (var columnIndex = 0; columnIndex < comparisonData.Columns.Count; columnIndex++)
                     {
                         var columnName = comparisonData.Columns[columnIndex];
-                        
+
                         // Compare this column comparisonData (select based on columnName) to the supplied comparisonData
+                        // Also compare ToString() of both values if allowToStringComparison is set
                         if (comparisonDataRow.ColumnValues.ContainsKey(columnName) 
-                            && tabularDataRow.ColumnValues[columnName]!.Equals(comparisonDataRow.ColumnValues[columnName]))
+                            && tabularDataRow.ColumnValues[columnName]!.Equals(comparisonDataRow.ColumnValues[columnName]) 
+                                || allowToStringComparison && tabularDataRow.ColumnValues[columnName]!.ToString().Equals(comparisonDataRow.ColumnValues[columnName]!.ToString()))
                             columnComparisonsSatisfied += 1;
                     }
 
@@ -423,8 +426,11 @@ namespace CSharpSqlTests
                 }
 
                 if (!comparisonDataRowIsSatisfied)
-                    differences.Add($"TabularData does not contain a row that contains the values {string.Join(",", comparisonDataRow.ColumnValues)}");
+                    differences.Add($"this TabularData does not contain a row that satisfies the row[{comparisonRowIndex}] in the comparisonData.");
             }
+
+            if(differences.Any() && !allowToStringComparison)
+                differences.Add($"Please ensure the types in the comparisonData match (i.e. a Guid is not the same as a string containing the said Guid) OR set the allowToStringComparison flag.");
 
             return differences.Count == 0;
         }

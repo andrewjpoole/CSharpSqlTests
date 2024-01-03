@@ -144,6 +144,9 @@ namespace CSharpSqlTests
         }
 
         /// <inheritdoc />
+        public string ConnectionString => _context.ConnectionString;
+
+        /// <inheritdoc />
         public void CloseDataReaderIfOpen()
         {
             if (_dataReader is not null && !_dataReader.IsClosed)

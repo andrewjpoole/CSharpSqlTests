@@ -55,7 +55,11 @@ namespace CSharpSqlTests
         /// <param name="namedDatabase">The name of the database to connect to</param>
         void OpenConnectionAndChangeToNamedDatabase(string? namedDatabase = null);
         /// <summary>
-        /// A connection to the temporary localDb instance, public so that extension methods of the Given, When and Then can access it.
+        /// A property which exposes a connection string to the database context.
+        /// </summary>
+        string ConnectionString { get; }
+        /// <summary>
+        /// A connection to the database context, public so that extension methods of the Given, When and Then can access it.
         /// Maybe null if called outside of a test, in which case use GetNewSqlConnection() instead.
         /// </summary>
         IDbConnection? SqlConnection { get; }

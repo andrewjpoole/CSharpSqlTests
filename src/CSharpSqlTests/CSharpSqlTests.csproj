@@ -12,8 +12,9 @@
 	<RepositoryUrl>https://github.com/andrewjpoole/CSharpSqlTests</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
 	<PackageTags>sql testing; stored procedure testing; dacpac testing;</PackageTags>
-	<Version>1.7.5</Version>
+	<Version>1.7.6</Version>
 	<PackageReleaseNotes>
+		1.7.6) Added an addition comparison option to TabularData Contains method and exposed the ConnectionString property through the test context.
 		1.7.5) Added OpenConnectionAndChangeToNamedDatabase() method, in case a repository layer disposes of the connection with a 'using'
 		1.7.4) Added version of RunTest() which doesn't use a transaction and Given.AnyDataInTheTableIsRemoved()
 		1.7.3) Upgraded packages and switched to Microsoft.Data.SqlClient

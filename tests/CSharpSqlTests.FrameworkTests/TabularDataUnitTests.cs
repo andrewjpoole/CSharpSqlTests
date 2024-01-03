@@ -198,7 +198,7 @@ VALUES
             var result = tabularData.Contains(subsetOfTabularData, out var differences);
 
             result.Should().BeFalse();
-            differences.Should().Contain(difference => difference == "TabularData does not contain a row that contains the values [created, 31/10/2021 00:00:00],[id, 30]");
+            differences.Should().Contain(difference => difference == "Please ensure the types in the comparisonData match (i.e. a Guid is not the same as a string containing the said Guid) OR set the allowToStringComparison flag.");
         }
 
         [Fact]
@@ -222,6 +222,52 @@ VALUES
 
             result.Should().BeFalse();
             differences.Should().Contain(difference => difference == "TabularData does not contain a column named frogs");
+        }
+
+        [Fact]
+        public void Contains_returns_false_if_types_dont_match()
+        {
+            var testString = @" | id | state | created    | ref          |
+                                | -- | ----- | ---------- | ------------ |
+                                | 1  | 10    | 2021/11/02 | 23hgf4hj3gf4 |
+                                | 2  | 20    | 2021/11/01 | 623kj4hv6hv4 |
+                                | 3  | 30    | 2021/10/31 | e0v9736eu476 |";
+
+            var tabularData = TabularData.FromMarkdownTableString(testString);
+
+            var subsetString = @" | id    | state  |
+                                  | ----- | ------ |
+                                  | 3     | ""30"" |";
+
+            var subsetOfTabularData = TabularData.FromMarkdownTableString(subsetString);
+
+            var result = tabularData.Contains(subsetOfTabularData, out var differences);
+
+            result.Should().BeFalse();
+            differences.Should().Contain(difference => difference == "Please ensure the types in the comparisonData match (i.e. a Guid is not the same as a string containing the said Guid) OR set the allowToStringComparison flag.");
+        }
+
+        [Fact]
+        public void Contains_returns_true_if_types_dont_match_but_allowToStringComparison_is_true()
+        {
+            var testString = @" | id | state | created    | ref          |
+                                | -- | ----- | ---------- | ------------ |
+                                | 1  | 10    | 2021/11/02 | 23hgf4hj3gf4 |
+                                | 2  | 20    | 2021/11/01 | 623kj4hv6hv4 |
+                                | 3  | 30    | 2021/10/31 | e0v9736eu476 |";
+
+            var tabularData = TabularData.FromMarkdownTableString(testString);
+
+            var subsetString = @" | id    | state  |
+                                  | ----- | ------ |
+                                  | 3     | ""30"" |";
+
+            var subsetOfTabularData = TabularData.FromMarkdownTableString(subsetString);
+
+            var result = tabularData.Contains(subsetOfTabularData, out var differences, true);
+
+            result.Should().BeTrue();
+            differences.Should().BeEmpty();
         }
 
         [Fact]
