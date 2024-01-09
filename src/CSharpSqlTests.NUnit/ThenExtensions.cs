@@ -11,7 +11,7 @@ public static class ThenExtensions
     /// <param name="expected">An object containing the value to assert</param>
     public static Then TheNonReaderQueryResultShouldBe(this Then then, object expected)
     {
-        Assert.True(then.Context.LastNonReaderQueryResult?.Equals(expected));
+        Assert.That(then.Context.LastNonReaderQueryResult?.Equals(expected), Is.True);
         return then;
     }
 
@@ -24,7 +24,7 @@ public static class ThenExtensions
     {
         then.TheScalarQueryIsExecuted(cmdText, out var returnValue);
 
-        Assert.True(assertionUsingQueryResult(returnValue), "Func assertionUsingQueryResult did not evaluate to true");
+        Assert.That(assertionUsingQueryResult(returnValue), Is.True, "Func assertionUsingQueryResult did not evaluate to true");
 
         return then;
     }
@@ -38,7 +38,7 @@ public static class ThenExtensions
     {
         then.TheReaderQueryIsExecuted(cmdText, out var returnValue);
 
-        Assert.True(assertionUsingQueryResult(returnValue), "Func assertionUsingQueryResult did not evaluate to true");
+        Assert.That(assertionUsingQueryResult(returnValue), Is.True, "Func assertionUsingQueryResult did not evaluate to true");
 
         return then;
     }
